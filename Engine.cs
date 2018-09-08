@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Yui
 {
-    public class Engine
+    public static class Engine
     {
+        public static Dictionary<String, DataBase.SQLConfig> DBConfig;
     }
 }
