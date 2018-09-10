@@ -1,0 +1,8 @@
+E:\Documents\DD\Personal\source\Yui\bin\Debug\Yui.dll
+E:\Documents\DD\Personal\source\Yui\bin\Debug\Yui.pdb
+E:\Documents\DD\Personal\source\Yui\bin\Debug\MySql.Data.dll
+E:\Documents\DD\Personal\source\Yui\obj\Debug\Yui.csprojAssemblyReference.cache
+E:\Documents\DD\Personal\source\Yui\obj\Debug\Yui.csproj.CoreCompileInputs.cache
+E:\Documents\DD\Personal\source\Yui\obj\Debug\Yui.csproj.CopyComplete
+E:\Documents\DD\Personal\source\Yui\obj\Debug\Yui.dll
+E:\Documents\DD\Personal\source\Yui\obj\Debug\Yui.pdb
