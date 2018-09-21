@@ -15,7 +15,7 @@ namespace Yui.DataBase
         #region Propiedades Privadas
         protected SqlConnection con1;
         protected MySqlConnection con2;
-        protected TipoConexion Tipo;
+        protected new TipoConexion Tipo;
         protected Boolean DebugMode = false;
         protected Boolean _Status = false;
         #endregion
@@ -34,6 +34,7 @@ namespace Yui.DataBase
         /// Devuelve la cantidad de filas afectadas al ejecutar Insert, Update o Delete
         /// </summary>
         public int Affected_rows { get; set; }
+        //public Estructura.ObjSQL
         #endregion
 
         #region Metodos Inicializadores
@@ -89,6 +90,7 @@ namespace Yui.DataBase
         public void Inicializar(SQLConfig c)
         {
             Tipo = c.Tipo;
+            base.TipoDB = c.Tipo;
             Conexion(c);
         }
         private void Conexion(SQLConfig c)
@@ -141,6 +143,7 @@ namespace Yui.DataBase
         #endregion
 
         #region Metodos Publicos
+        #region Metodos Manuales
         /// <summary>
         /// Permite ejecutar una consulta SQL indicando todo el sintaxis SQL
         /// </summary>
@@ -150,7 +153,7 @@ namespace Yui.DataBase
         /// <returns>
         /// Devuelve Objeto SQL para procesar los datos que retorna
         /// </returns>
-        public Estructura.ObjSQL SelectRaw(String sql)
+        public Estructura.ObjSQL Query(String sql)
         {
             return ExecuteQuery(sql);
         }
@@ -163,17 +166,127 @@ namespace Yui.DataBase
         {
             ExecuteNonQuery(sql);
             return Affected_rows;
-        }       
+        }
+        /// <summary>
+        /// Permite ejecutar un Update especificando la sintexis SQL
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
         public int UpdateRaw(String sql)
         {
             ExecuteNonQuery(sql);
             return Affected_rows;
         }
+        /// <summary>
+        /// Permite ejecutar un Delete especificando la sintexis SQL
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
         public int DeleteRaw(String sql)
         {
             ExecuteNonQuery(sql);
             return Affected_rows;
         }
+        #endregion
+        #region Metodos Autogenerados
+        #region Select
+        public Estructura.ObjSQL Get()
+        {
+            String sql = base.Generar();
+            return ExecuteQuery(sql);
+        }
+        public Estructura.ObjSQL Get(String tabla)
+        {
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            return ExecuteQuery(sql);
+        }
+        public Estructura.ObjSQL Get(String tabla, Dictionary<String, Object> where)
+        {
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            return ExecuteQuery(sql);
+        }
+        #endregion
+        #region Insert
+        public int Insert()
+        {
+            base.Tipo = TipoQuery.INSERT;
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        public int Insert(String tabla)
+        {
+            base.Tipo = TipoQuery.INSERT;
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        public int Insert(String tabla, Dictionary<String, Object> campos)
+        {
+            base.Tipo = TipoQuery.INSERT;
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        #endregion
+        #region Update
+        public int Update()
+        {
+            base.Tipo = TipoQuery.UPDATE;
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        public int Update(String tabla)
+        {
+            base.Tipo = TipoQuery.UPDATE;
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        public int Update(String tabla, Dictionary<String, Object> campos)
+        {
+            base.Tipo = TipoQuery.UPDATE;
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        #endregion
+        #region Delete
+        public int Delete()
+        {
+            base.Tipo = TipoQuery.DELETE;
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        public int Delete(String tabla)
+        {
+            base.Tipo = TipoQuery.DELETE;
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        public int Delete(String tabla, Dictionary<String, Object> where)
+        {
+            base.Tipo = TipoQuery.DELETE;
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            ExecuteNonQuery(sql);
+            return Affected_rows;
+        }
+        #endregion
+
+        #endregion
         #endregion
 
         #region Metodos Privados
@@ -280,6 +393,7 @@ namespace Yui.DataBase
         }
         private void ExecuteNonQuery(String sql)
         {
+            Affected_rows = 0;
             switch (Tipo)
             {
                 case TipoConexion.MSSQL:
