@@ -13,6 +13,7 @@ namespace Yui.DataBase
         private String _tabla;
         private String _whereRaw;
         private String[] _comparadores;
+        private Dictionary<String, Object> _campos;
         public TipoQuery Tipo { get; set; }
         public TipoConexion TipoDB { get; set; }
 
@@ -35,6 +36,7 @@ namespace Yui.DataBase
             _selectRaw = "";
             _tabla = "";
             _whereRaw = "";
+            _campos = new Dictionary<string, object>();
             Tipo = TipoQuery.SELECT;
         }
         public void NewQuery(TipoQuery tipo)
@@ -49,7 +51,35 @@ namespace Yui.DataBase
         {
             _tabla = tabla;
         }
-
+        public void Select(String campos)
+        {
+            SetCampos(campos);
+        }
+        public void SetCampos(String campos)
+        {
+            foreach (var item in campos.Split(','))
+            {
+                SetCampos(item, new object());
+            }
+        }
+        public void SetCampos(String campo, Object valor)
+        {
+            if (_campos.ContainsKey(campo.ToLower()))
+            {
+                _campos[campo.ToLower()] = valor;
+            }
+            else
+            {
+                _campos.Add(campo.ToLower(), valor);
+            }
+        }
+        public void SetCampos(Dictionary<String, Object> campos)
+        {
+            foreach (var item in campos)
+            {
+                SetCampos(item.Key, item.Value);
+            }
+        }
         public void Where(String campo, Object valor, String comparador = "=")
         {
             if (_comparadores.Contains<String>(comparador))
@@ -167,13 +197,21 @@ namespace Yui.DataBase
         private String CheckValor(Object valor)
         {
             String temp = "";
-            if (valor.GetType() == typeof(decimal))
+            if (
+                valor.GetType() == typeof(decimal) ||
+                valor.GetType() == typeof(float) ||
+                valor.GetType() == typeof(double)
+                )
             {
-
+                temp = valor.ToString().Replace(",", ".");
             }
             else if (valor.GetType() == typeof(int))
             {
                 temp = valor.ToString();
+            }
+            else if (valor.GetType() == typeof(DateTime))
+            {
+                temp = Funciones.Times.FechaFormat(Convert.ToDateTime(valor), TipoFecha.yyyyMMddGuionHHmmss);
             }
             else
             {
@@ -190,6 +228,45 @@ namespace Yui.DataBase
         public String Generar()
         {
             String sql = "";
+            switch (Tipo)
+            {
+                case TipoQuery.SELECT:
+                    break;
+                case TipoQuery.UPDATE:
+                    ///UPDATE Customers SET ContactName = 'Alfred Schmidt', City = 'Frankfurt' WHERE CustomerID = 1;
+                    sql = "UPDATE " + _tabla;
+                    String c = "";
+                    foreach (var item in _campos)
+                    {
+                        if (c == "")
+                        {
+                            c = item.Key + " = '" + CheckValor(item.Value) + "'";
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    sql += " SET " + c;
+                    if (_whereRaw != "")
+                    {
+                        sql += " WHERE " + _whereRaw;
+                    }
+                    break;
+                case TipoQuery.INSERT:
+                    break;
+                case TipoQuery.DELETE:
+                    sql = "DELETE FROM " + _tabla ;
+                    if (_whereRaw != "")
+                    {
+                        sql += " WHERE " + _whereRaw;
+                    }
+                   
+                    break;
+                default:
+                    break;
+            }
+            sql += ";";
             return sql;
         }
     }

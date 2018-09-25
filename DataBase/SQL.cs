@@ -15,9 +15,8 @@ namespace Yui.DataBase
         #region Propiedades Privadas
         protected SqlConnection con1;
         protected MySqlConnection con2;
-        protected new TipoConexion Tipo;
-        protected Boolean DebugMode = false;
-        protected Boolean _Status = false;
+        protected new TipoConexion Tipo;        
+        protected Boolean _Status = false;        
         #endregion
         #region Propiedades Publicas
         /// <summary>
@@ -34,7 +33,8 @@ namespace Yui.DataBase
         /// Devuelve la cantidad de filas afectadas al ejecutar Insert, Update o Delete
         /// </summary>
         public int Affected_rows { get; set; }
-        //public Estructura.ObjSQL
+        public Boolean DebugMode { get; set; } = false;
+        public String LastQuery { get; set; } = "";
         #endregion
 
         #region Metodos Inicializadores
@@ -208,6 +208,14 @@ namespace Yui.DataBase
             String sql = base.Generar();
             return ExecuteQuery(sql);
         }
+        public Estructura.ObjSQL Get(String campos, String tabla, Dictionary<String, Object> where)
+        {
+            base.SetCampos(campos);
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            return ExecuteQuery(sql);
+        }
         #endregion
         #region Insert
         public int Insert()
@@ -229,6 +237,7 @@ namespace Yui.DataBase
         {
             base.Tipo = TipoQuery.INSERT;
             base.Tabla(tabla);
+            base.SetCampos(campos);
             String sql = base.Generar();
             ExecuteNonQuery(sql);
             return Affected_rows;
@@ -254,6 +263,7 @@ namespace Yui.DataBase
         {
             base.Tipo = TipoQuery.UPDATE;
             base.Tabla(tabla);
+            base.SetCampos(campos);
             String sql = base.Generar();
             ExecuteNonQuery(sql);
             return Affected_rows;
@@ -292,6 +302,7 @@ namespace Yui.DataBase
         #region Metodos Privados
         private Estructura.ObjSQL ExecuteQuery(String sql)
         {
+            LastQuery = sql;
             Estructura.ObjSQL s = new Estructura.ObjSQL();
             switch (Tipo)
             {
@@ -389,10 +400,12 @@ namespace Yui.DataBase
                     }
                     break;
             }
+            base.NewQuery();
             return s;
         }
         private void ExecuteNonQuery(String sql)
         {
+            LastQuery = sql;
             Affected_rows = 0;
             switch (Tipo)
             {
@@ -475,6 +488,7 @@ namespace Yui.DataBase
                     }
                     break;
             }
+            base.NewQuery();
         }
         #endregion
 

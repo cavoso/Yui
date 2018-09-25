@@ -27,4 +27,23 @@
         /// </summary>
         Termina = 2
     }
+    public enum TipoFecha
+    {
+        /// <summary>
+        /// dd/MM/yyyy
+        /// </summary>
+        ddMMyyyySlash = 0,
+        /// <summary>
+        /// dd/MM/yyyy HH:mm:ss
+        /// </summary>
+        ddMMyyyySlashHHmmss = 1,
+        /// <summary>
+        /// yyyy-MM-dd
+        /// </summary>
+        yyyyMMddGuion = 2,
+        /// <summary>
+        /// yyyy-MM-dd HH:mm:ss
+        /// </summary>
+        yyyyMMddGuionHHmmss = 3
+    }
 }

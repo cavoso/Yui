@@ -9,5 +9,7 @@ namespace Yui
     public static class Engine
     {
         public static Dictionary<String, DataBase.SQLConfig> DBConfig;
+        
     }
+
 }
