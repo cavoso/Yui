@@ -16,7 +16,8 @@ namespace Yui.DataBase
         protected SqlConnection con1;
         protected MySqlConnection con2;
         protected new TipoConexion Tipo;        
-        protected Boolean _Status = false;        
+        protected Boolean _Status = false;
+        protected List<String> esql;
         #endregion
         #region Propiedades Publicas
         /// <summary>
@@ -33,8 +34,18 @@ namespace Yui.DataBase
         /// Devuelve la cantidad de filas afectadas al ejecutar Insert, Update o Delete
         /// </summary>
         public int Affected_rows { get; set; }
+        /// <summary>
+        /// Devuelve o Establece el estado de Debug, lo que hace que el sistema informe de cualquier error
+        /// </summary>
         public Boolean DebugMode { get; set; } = false;
+        /// <summary>
+        /// Devuelve o Establece la ultima consultas SQL
+        /// </summary>
         public String LastQuery { get; set; } = "";
+        /// <summary>
+        /// Devuelve o Establece el estado de mantener la consulta, esta propiedad se usa solo para hacer Commit
+        /// </summary>
+        public Boolean Preserve { get; set; } = false;
         #endregion
 
         #region Metodos Inicializadores
@@ -91,6 +102,7 @@ namespace Yui.DataBase
         {
             Tipo = c.Tipo;
             base.TipoDB = c.Tipo;
+            esql = new List<string>();
             Conexion(c);
         }
         private void Conexion(SQLConfig c)
@@ -164,7 +176,14 @@ namespace Yui.DataBase
         /// <returns></returns>
         public int InsertRaw(String sql)
         {
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         /// <summary>
@@ -174,7 +193,14 @@ namespace Yui.DataBase
         /// <returns></returns>
         public int UpdateRaw(String sql)
         {
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         /// <summary>
@@ -184,23 +210,45 @@ namespace Yui.DataBase
         /// <returns></returns>
         public int DeleteRaw(String sql)
         {
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         #endregion
         #region Metodos Autogenerados
         #region Select
+        /// <summary>
+        /// Ejecuta la consulta SQL, los parametros de configuracion deben estar establecidos previamente
+        /// </summary>
+        /// <returns></returns>
         public Estructura.ObjSQL Get()
         {
             String sql = base.Generar();
             return ExecuteQuery(sql);
         }
+        /// <summary>
+        /// Ejecuta la consulta SQL con la tabla asignada si no hay otros parametros configurados realizara la consulta SELECT * FROM TABLA 
+        /// </summary>
+        /// <param name="tabla"></param>
+        /// <returns></returns>
         public Estructura.ObjSQL Get(String tabla)
         {
             base.Tabla(tabla);
             String sql = base.Generar();
             return ExecuteQuery(sql);
         }
+        /// <summary>
+        /// Ejecuta la consulta SQL con la tabla y las condiciones asignadas
+        /// </summary>
+        /// <param name="tabla"></param>
+        /// <param name="where"></param>
+        /// <returns></returns>
         public Estructura.ObjSQL Get(String tabla, Dictionary<String, Object> where)
         {
             base.Tabla(tabla);
@@ -208,6 +256,13 @@ namespace Yui.DataBase
             String sql = base.Generar();
             return ExecuteQuery(sql);
         }
+        /// <summary>
+        /// Ejecuta la consulta SQL solicitando los campos con la tabla y las condiciones asignadas
+        /// </summary>
+        /// <param name="campos"></param>
+        /// <param name="tabla"></param>
+        /// <param name="where"></param>
+        /// <returns></returns>
         public Estructura.ObjSQL Get(String campos, String tabla, Dictionary<String, Object> where)
         {
             base.SetCampos(campos);
@@ -218,37 +273,84 @@ namespace Yui.DataBase
         }
         #endregion
         #region Insert
+        /// <summary>
+        /// Realiza un insert, requiere que se hayan establecido campos, valores y la tabla previamente
+        /// </summary>
+        /// <returns></returns>
         public int Insert()
         {
             base.Tipo = TipoQuery.INSERT;
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
+        /// <summary>
+        /// Permite realizar un insert, requiere que se hayan establecido campos y valores previamente
+        /// </summary>
+        /// <param name="tabla"></param>
+        /// <returns></returns>
         public int Insert(String tabla)
         {
             base.Tipo = TipoQuery.INSERT;
             base.Tabla(tabla);
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
+        /// <summary>
+        /// Permite realizar un insert, con la tabla y los campos indicados
+        /// </summary>
+        /// <param name="tabla"></param>
+        /// <param name="campos"></param>
+        /// <returns></returns>
         public int Insert(String tabla, Dictionary<String, Object> campos)
         {
             base.Tipo = TipoQuery.INSERT;
             base.Tabla(tabla);
             base.SetCampos(campos);
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         #endregion
         #region Update
+        /// <summary>
+        /// Ejecuta un update, los parametros deben estar establecidos previamente
+        /// </summary>
+        /// <returns></returns>
         public int Update()
         {
             base.Tipo = TipoQuery.UPDATE;
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         public int Update(String tabla)
@@ -256,7 +358,14 @@ namespace Yui.DataBase
             base.Tipo = TipoQuery.UPDATE;
             base.Tabla(tabla);
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         public int Update(String tabla, Dictionary<String, Object> campos)
@@ -265,7 +374,31 @@ namespace Yui.DataBase
             base.Tabla(tabla);
             base.SetCampos(campos);
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
+            return Affected_rows;
+        }
+        public int Update(String tabla, Dictionary<String, Object> campos, Dictionary<String, Object> where)
+        {
+            base.Tipo = TipoQuery.UPDATE;
+            base.Tabla(tabla);
+            base.SetCampos(campos);
+            base.Where(where);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         #endregion
@@ -274,7 +407,15 @@ namespace Yui.DataBase
         {
             base.Tipo = TipoQuery.DELETE;
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
+            
             return Affected_rows;
         }
         public int Delete(String tabla)
@@ -282,7 +423,14 @@ namespace Yui.DataBase
             base.Tipo = TipoQuery.DELETE;
             base.Tabla(tabla);
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         public int Delete(String tabla, Dictionary<String, Object> where)
@@ -291,11 +439,29 @@ namespace Yui.DataBase
             base.Tabla(tabla);
             base.Where(where);
             String sql = base.Generar();
-            ExecuteNonQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+            }
+            else
+            {
+                ExecuteNonQuery(sql);
+            }
             return Affected_rows;
         }
         #endregion
-
+        public Boolean Commit()
+        {
+            ExecuteNonQueryCommit();
+            if (Affected_rows > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         #endregion
         #endregion
 
@@ -489,6 +655,122 @@ namespace Yui.DataBase
                     break;
             }
             base.NewQuery();
+        }
+        private void ExecuteNonQueryCommit()
+        {
+            LastQuery = "";
+            Affected_rows = 0;
+            switch (Tipo)
+            {
+                case TipoConexion.MSSQL:
+                    con1.Open();
+
+                    SqlCommand cmd1 = con1.CreateCommand();
+                    SqlTransaction transaction1;
+
+                    transaction1 = con1.BeginTransaction();
+                    cmd1.Connection = con1;
+                    cmd1.Transaction = transaction1;
+                    try
+                    {
+                        foreach (String item in esql)
+                        {
+                            cmd1.CommandText = item;
+                            Affected_rows += cmd1.ExecuteNonQuery();
+                        }
+                        transaction1.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        try
+                        {
+                            transaction1.Rollback();
+                        }
+                        catch (SqlException ex)
+                        {
+                            if (DebugMode)
+                            {
+                                MessageBox.Show(
+                                    "Imposible ejecutar el Rollback \n" +
+                                    "Error: " + ex.Message,
+                                    "Error",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error
+                                );
+                            }
+                        }
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar el commit \n" +
+                                "Error: " + e.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    finally
+                    {
+                        con1.Close();
+                        esql = new List<string>();
+                        Preserve = false;
+                    }
+                    break;
+                case TipoConexion.MYSQL:
+                    con2.Open();
+                    MySqlCommand cmd = con2.CreateCommand();
+                    MySqlTransaction transaction;
+                    transaction = con2.BeginTransaction();
+                    cmd.Connection = con2;
+                    cmd.Transaction = transaction;
+                    try
+                    {
+                        foreach (String item in esql)
+                        {
+                            cmd.CommandText = item;
+                            Affected_rows += cmd.ExecuteNonQuery();
+                        }
+                        transaction.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        try
+                        {
+                            transaction.Rollback();
+                        }
+                        catch (SqlException ex)
+                        {
+                            if (DebugMode)
+                            {
+                                MessageBox.Show(
+                                    "Imposible ejecutar el Rollback \n" +
+                                    "Error: " + ex.Message,
+                                    "Error",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error
+                                );
+                            }
+                        }
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar el commit \n" +
+                                "Error: " + e.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    finally
+                    {
+                        con2.Close();
+                        esql = new List<string>();
+                        Preserve = false;
+                    }
+                    break;
+            }
         }
         #endregion
 

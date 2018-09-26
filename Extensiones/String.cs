@@ -55,17 +55,11 @@ namespace Yui.Extensiones
                 return aString;
             }
         }
-        public static String MesEnPalabras(this String m)
-        {
-            try
-            {
-                return Funciones.Times.Meses[Convert.ToInt32(m)];
-            }
-            catch (Exception)
-            {
-                return "Error";
-            }
-        }
+        /// <summary>
+        /// Recibe el nombre en inglés y lo transforma a español
+        /// </summary>
+        /// <param name="d"></param>
+        /// <returns></returns>
         public static String DiaDeLaSemana(this String d)
         {
             try

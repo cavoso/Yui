@@ -58,6 +58,8 @@
     <Compile Include="DataBase\SQL.cs" />
     <Compile Include="DataBase\SQLConfig.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="Extensiones\DateTime.cs" />
+    <Compile Include="Extensiones\int.cs" />
     <Compile Include="Extensiones\String.cs" />
     <Compile Include="Filtros.cs" />
     <Compile Include="Funciones\Comunes.cs" />
