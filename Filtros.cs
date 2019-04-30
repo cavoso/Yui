@@ -46,4 +46,22 @@
         /// </summary>
         yyyyMMddGuionHHmmss = 3
     }
+    public enum TipoCampo
+    {
+        General = 0,
+        Numero = 1,
+        Letras = 2
+    }
+    public enum Signo
+    {
+        Ninguno = 0,
+        Peso = 1,
+        Dolar = 2,
+        Euro = 3
+    }
+    public enum RespuestaSimple
+    {
+        NO = 0,
+        SI = 1
+    }
 }

@@ -28,7 +28,9 @@ namespace Yui.DataBase
                 ">",
                 "<",
                 ">=",
-                "<="
+                "<=",
+                "IS NOT",
+                "IS"
             };
         }
         public void NewQuery()
@@ -84,7 +86,7 @@ namespace Yui.DataBase
         {
             if (_comparadores.Contains<String>(comparador))
             {
-                _WhereSet(campo + comparador, CheckValor(valor));
+                _WhereSet("AND " + campo + comparador, CheckValor(valor));
             }
             else
             {
@@ -95,7 +97,6 @@ namespace Yui.DataBase
         {
             foreach (var item in w)
             {
-                //_Where.Add(item.Key, item.Value);
                 Where(item.Key, item.Value);
             }
         }
@@ -128,6 +129,16 @@ namespace Yui.DataBase
             {
                 Console.Out.WriteLine("El Comparador ingresado (" + comparador.ToString() + ") no es admitido");
             }
+        }
+        public void InWere(String campo, String en)
+        {
+            //_WhereSet(campo + " IN ", en);
+            _whereRaw += (campo + " IN " + en);
+        }
+        public void NotInWere(String campo, String en)
+        {
+            //_WhereSet(campo + " IN ", en);
+            _whereRaw += (campo + " NOT IN " + en);
         }
         public void Like(String campo, Object valor, TipoLike like = TipoLike.Contiene)
         {
@@ -187,11 +198,11 @@ namespace Yui.DataBase
         {
             if (_whereRaw == "")
             {
-                _whereRaw = campo.Replace("OR ", "").Replace("NOT ", "") + "'" + valor + "'";
+                _whereRaw = campo.Replace("OR ", "").Replace("NOT ", "").Replace("AND", "") + "'" + valor + "'";
             }
             else
             {
-                _whereRaw += campo + "'" + valor + "'";
+                _whereRaw += " " + campo + "'" + valor + "'";
             }
         }
         private String CheckValor(Object valor)
@@ -231,6 +242,32 @@ namespace Yui.DataBase
             switch (Tipo)
             {
                 case TipoQuery.SELECT:
+                    sql = "SELECT ";
+                    String ca = "";
+                    foreach (var item in _campos)
+                    {
+                        if (ca == "")
+                        {
+                            ca = item.Key;
+                        }
+                        else
+                        {
+                            ca = ca + ", " + item.Key;
+                        }
+                    }
+                    if (ca != "")
+                    {
+                        sql += ca + " ";
+                    }
+                    else
+                    {
+                        sql += "* ";
+                    }
+                    sql += "FROM " + _tabla;
+                    if (_whereRaw != "")
+                    {
+                        sql += " WHERE " + _whereRaw;
+                    }
                     break;
                 case TipoQuery.UPDATE:
                     ///UPDATE Customers SET ContactName = 'Alfred Schmidt', City = 'Frankfurt' WHERE CustomerID = 1;
@@ -244,7 +281,7 @@ namespace Yui.DataBase
                         }
                         else
                         {
-
+                            c += ", " + item.Key + " = '" + CheckValor(item.Value) + "'";
                         }
                     }
                     sql += " SET " + c;
@@ -254,6 +291,29 @@ namespace Yui.DataBase
                     }
                     break;
                 case TipoQuery.INSERT:
+                    //INSERT INTO CUSTOMERS (ID,NAME,AGE,ADDRESS,SALARY)
+                    //VALUES(6, 'Komal', 22, 'MP', 4500.00);
+                    sql = "INSERT INTO " + _tabla;
+                    string campos = "";
+                    string valores = "";
+                    foreach (var item in _campos)
+                    {
+                        if (campos =="")
+                        {
+                            campos = item.Key;
+                            valores = "'" + CheckValor(item.Value) + "'";
+                        }
+                        else
+                        {
+                            campos += ", " + item.Key;
+                            valores = ", '" + CheckValor(item.Value) + "'";
+                        }
+                    }
+                    if (campos != "" & valores != "")
+                    {
+                        sql += "(" + campos + ")";
+                        sql += "VALUES(" + valores + ")";
+                    }
                     break;
                 case TipoQuery.DELETE:
                     sql = "DELETE FROM " + _tabla ;

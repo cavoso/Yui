@@ -58,6 +58,7 @@
     <Compile Include="DataBase\SQL.cs" />
     <Compile Include="DataBase\SQLConfig.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="Estructuras\ObjDataToGrid.cs" />
     <Compile Include="Extensiones\DateTime.cs" />
     <Compile Include="Extensiones\int.cs" />
     <Compile Include="Extensiones\String.cs" />
@@ -65,9 +66,14 @@
     <Compile Include="Funciones\Comunes.cs" />
     <Compile Include="Funciones\Times.cs" />
     <Compile Include="Funciones\Validadores.cs" />
+    <Compile Include="Herramientas Personalizadas\YUITextbox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Herramientas Personalizadas\YUITextbox.Designer.cs">
+      <DependentUpon>YUITextbox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include="as.pfx" />

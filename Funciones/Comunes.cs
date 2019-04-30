@@ -133,7 +133,23 @@ namespace Yui.Funciones
 
             return rnum;
         }
-        
+        public static String NumberK(int num)
+        {
+            String n = num.ToString();
+            double d = 0;
+            if (num >= 999 & num <= 999999)
+            {
+                d = Math.Round(Convert.ToDouble((num / 1000)), 1);
+                n = d + "K";
+            }
+            if (num >= 999999)
+            {
+                d = Math.Round(Convert.ToDouble((num / 1000000)), 1);
+                n = d + "M";
+            }
+
+            return n;
+        }
 
     }
 }

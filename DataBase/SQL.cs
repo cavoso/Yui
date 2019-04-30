@@ -155,6 +155,14 @@ namespace Yui.DataBase
         #endregion
 
         #region Metodos Publicos
+        /// <summary>
+        /// Devuelve el listado de sintaxis SQL preservadas para Commit
+        /// </summary>
+        /// <returns></returns>
+        public List<String> PreserveSQL()
+        {
+            return esql;
+        }
         #region Metodos Manuales
         /// <summary>
         /// Permite ejecutar una consulta SQL indicando todo el sintaxis SQL
