@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -149,6 +150,20 @@ namespace Yui.Funciones
             }
 
             return n;
+        }
+        public static Boolean Enter(KeyPressEventArgs e)
+        {
+            if (e.KeyChar == Convert.ToChar(Keys.Enter))
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+        }
+        public static void ChangeSizeImageButton(Button btn, int s = 32)
+        {
+            btn.Image = new Bitmap(btn.Image, s, s);
         }
 
     }

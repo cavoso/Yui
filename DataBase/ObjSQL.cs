@@ -11,23 +11,23 @@ namespace Yui.DataBase.Estructura
     public class ObjSQL
     {
         protected DataSet _DS;
-        public List<Dictionary<String, object>> Lista;
+        protected List<Dictionary<String, YUIObject>> Lista;
         public ObjSQL()
         {
-            Lista = new List<Dictionary<string, object>>();
+            Lista = new List<Dictionary<String, YUIObject>>();
         }
         public ObjSQL(DataSet ds)
         {
-            Lista = new List<Dictionary<string, object>>();
+            Lista = new List<Dictionary<String, YUIObject>>();
             CallDS(ds);
         }
         public void CallDS(DataSet ds)
         {
             _DS = ds;
-            Lista = Datatable.AsEnumerable().Select(
-                row => Datatable.Columns.Cast<DataColumn>().ToDictionary(
+            Lista = Tabla.AsEnumerable().Select(
+                row => Tabla.Columns.Cast<DataColumn>().ToDictionary(
                     column => column.ColumnName,
-                    column => row[column]
+                    column => new YUIObject(row[column])
                 )
             ).ToList();
         }
@@ -38,35 +38,81 @@ namespace Yui.DataBase.Estructura
                 return _DS;
             }           
         }
-        public DataTable Datatable
+        public DataTable Tabla
         {
             get
             {
-                return _DS.Tables[0];
+                if (_DS is null)
+                {
+                    return new DataTable();
+                }
+                else
+                {
+                    return _DS.Tables[0];
+                }
+                
             }
         }
-        public void CheckColumns()
+        public Dictionary<String, YUIObject> Row(int r = 0)
         {
-            foreach (Dictionary<string, Object> item in Lista)
+            return Lista[r];
+        }
+        public YUIObject Row(int r, String c = "")
+        {
+            if (c != "")
             {
-                foreach (KeyValuePair<string, Object> it in item)
-                {
-                    Console.Out.WriteLine("Key: " + it.Key + "Valor: " + it.Value);
-                }
+                Dictionary<String, YUIObject> d = Row(r);
+                return d[c];
             }
+            else
+            {
+                return new YUIObject();
+            }
+        }
+        public List<Dictionary<String, YUIObject>> Result()
+        {
+            return Lista;
+        }
+        public Dictionary<String, YUIObject> Buscar(String dato)
+        {
+            var j = Lista.SelectMany(x => x).Where(x => x.Value.String.Contains(dato)).FirstOrDefault();
+            var d = Lista.Select(x => x).Where(x => x[j.Key].String == dato).ToList();
+            Dictionary<String, YUIObject> h = d[0];
+            return h;
+        }
+        public Dictionary<String, YUIObject> Buscar(String campo, String dato)
+        {           
+            var d = Lista.Select(x => x).Where(x => x[campo].String == dato).ToList();
+            Dictionary<String, YUIObject> h = d[0];
+            return h;
         }
         public int NumRows
         {
             get
             {
-                return Datatable.Rows.Count;
+                try
+                {
+                    return Tabla.Rows.Count;
+                }
+                catch (Exception)
+                {
+                    return 0;              
+                }
+                
             }
         }
         public int NumCol
         {
             get
             {
-                return Datatable.Columns.Count;
+                try
+                {
+                    return Tabla.Columns.Count;
+                }
+                catch (Exception)
+                {
+                    return 0;
+                }
             }
         }    
         public int Position { get; set; }

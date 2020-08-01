@@ -327,9 +327,16 @@ namespace Yui.Herramientas_Personalizadas
             const String RegChars = "SZszYAAAAAACEEEEIIIIDNOOOOOUUUUYaaaaaaceeeeiiiidnooooouuuuyy";
             for (int i = 0; i < AccChars.Length; i++)
             {
-                A = Strings.Mid(AccChars, i, 1);
-                B = Strings.Mid(RegChars, i, 1);
-                thestring = thestring.Replace(A, B);
+                try
+                {
+                    A = Strings.Mid(AccChars, i, 1);
+                    B = Strings.Mid(RegChars, i, 1);
+                    thestring = thestring.Replace(A, B);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
             return thestring;
         }

@@ -57,6 +57,7 @@
     <Compile Include="DataBase\ObjSQL.cs" />
     <Compile Include="DataBase\SQL.cs" />
     <Compile Include="DataBase\SQLConfig.cs" />
+    <Compile Include="DataBase\YUIObject.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Estructuras\ObjDataToGrid.cs" />
     <Compile Include="Extensiones\DateTime.cs" />
@@ -64,8 +65,13 @@
     <Compile Include="Extensiones\String.cs" />
     <Compile Include="Filtros.cs" />
     <Compile Include="Funciones\Comunes.cs" />
+    <Compile Include="Funciones\Security.cs" />
     <Compile Include="Funciones\Times.cs" />
     <Compile Include="Funciones\Validadores.cs" />
+    <Compile Include="Helpers\Pantalla.cs" />
+    <Compile Include="Herramientas Personalizadas\YUICombobox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Herramientas Personalizadas\YUITextbox.cs">
       <SubType>Component</SubType>
     </Compile>

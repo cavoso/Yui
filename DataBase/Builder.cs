@@ -12,6 +12,7 @@ namespace Yui.DataBase
         private String _selectRaw;
         private String _tabla;
         private String _whereRaw;
+        private String _orderby;
         private String[] _comparadores;
         private Dictionary<String, Object> _campos;
         public TipoQuery Tipo { get; set; }
@@ -38,6 +39,7 @@ namespace Yui.DataBase
             _selectRaw = "";
             _tabla = "";
             _whereRaw = "";
+            _orderby = "";
             _campos = new Dictionary<string, object>();
             Tipo = TipoQuery.SELECT;
         }
@@ -46,6 +48,7 @@ namespace Yui.DataBase
             _selectRaw = "";
             _tabla = "";
             _whereRaw = "";
+            _orderby = "";
             Tipo = tipo;
         }
 
@@ -145,16 +148,16 @@ namespace Yui.DataBase
             switch (like)
             {
                 case TipoLike.Contiene:
-                    _WhereSet(campo, "%" + CheckValor(valor) + "%");
+                    _WhereSet(campo + " LIKE ", "%" + CheckValor(valor) + "%");
                     break;
                 case TipoLike.Comienza:
-                    _WhereSet(campo, CheckValor(valor) + "%");
+                    _WhereSet(campo + " LIKE ", CheckValor(valor) + "%");
                     break;
                 case TipoLike.Termina:
-                    _WhereSet(campo, "%" + CheckValor(valor));
+                    _WhereSet(campo + " LIKE ", "%" + CheckValor(valor));
                     break;
                 default:
-                    _WhereSet(campo, "%" + CheckValor(valor) + "%");
+                    _WhereSet(campo + " LIKE ", "%" + CheckValor(valor) + "%");
                     break;
             }
         }
@@ -163,16 +166,16 @@ namespace Yui.DataBase
             switch (like)
             {
                 case TipoLike.Contiene:
-                    _WhereSet("OR " + campo, "%" + CheckValor(valor) + "%");
+                    _WhereSet("OR " + campo + " LIKE ", "%" + CheckValor(valor) + "%");
                     break;
                 case TipoLike.Comienza:
-                    _WhereSet("OR " + campo, CheckValor(valor) + "%");
+                    _WhereSet("OR " + campo + " LIKE ", CheckValor(valor) + "%");
                     break;
                 case TipoLike.Termina:
-                    _WhereSet("OR " + campo, "%" + CheckValor(valor));
+                    _WhereSet("OR " + campo + " LIKE ", "%" + CheckValor(valor));
                     break;
                 default:
-                    _WhereSet("OR " + campo, "%" + CheckValor(valor) + "%");
+                    _WhereSet("OR " + campo + " LIKE ", "%" + CheckValor(valor) + "%");
                     break;
             }
         }
@@ -181,16 +184,16 @@ namespace Yui.DataBase
             switch (like)
             {
                 case TipoLike.Contiene:
-                    _WhereSet("NOT " + campo, "%" + CheckValor(valor) + "%");
+                    _WhereSet(campo + "NOT LIKE", "%" + CheckValor(valor) + "%");
                     break;
                 case TipoLike.Comienza:
-                    _WhereSet("NOT " + campo, CheckValor(valor) + "%");
+                    _WhereSet(campo + "NOT LIKE", CheckValor(valor) + "%");
                     break;
                 case TipoLike.Termina:
-                    _WhereSet("NOT " + campo, "%" + CheckValor(valor));
+                    _WhereSet(campo + "NOT LIKE", "%" + CheckValor(valor));
                     break;
                 default:
-                    _WhereSet("NOT " + campo, "%" + CheckValor(valor) + "%");
+                    _WhereSet(campo + "NOT LIKE", "%" + CheckValor(valor) + "%");
                     break;
             }
         }
@@ -208,26 +211,33 @@ namespace Yui.DataBase
         private String CheckValor(Object valor)
         {
             String temp = "";
-            if (
-                valor.GetType() == typeof(decimal) ||
-                valor.GetType() == typeof(float) ||
-                valor.GetType() == typeof(double)
-                )
+            if (valor is null)
             {
-                temp = valor.ToString().Replace(",", ".");
-            }
-            else if (valor.GetType() == typeof(int))
+                temp = "";
+            } else
             {
-                temp = valor.ToString();
+                if (
+                    valor.GetType() == typeof(decimal) ||
+                    valor.GetType() == typeof(float) ||
+                    valor.GetType() == typeof(double)
+                    )
+                {
+                    temp = valor.ToString().Replace(",", ".");
+                }
+                else if (valor.GetType() == typeof(int))
+                {
+                    temp = valor.ToString();
+                }
+                else if (valor.GetType() == typeof(DateTime))
+                {
+                    temp = Funciones.Times.FechaFormat(Convert.ToDateTime(valor), TipoFecha.yyyyMMddGuionHHmmss);
+                }
+                else
+                {
+                    temp = valor.ToString();
+                }
             }
-            else if (valor.GetType() == typeof(DateTime))
-            {
-                temp = Funciones.Times.FechaFormat(Convert.ToDateTime(valor), TipoFecha.yyyyMMddGuionHHmmss);
-            }
-            else
-            {
-                temp = valor.ToString();
-            }
+            
             
             return temp;
         }
@@ -235,7 +245,25 @@ namespace Yui.DataBase
         {
             _whereRaw = w;
         }
-
+        public void OrderBy(String campo, String dir)
+        {
+            if (_orderby == "")
+            {
+                _orderby = campo + " " + dir.ToUpper();
+            }
+            else
+            {
+                _orderby += ", " +campo + " " + dir.ToUpper();
+            }
+        }
+        public void OrderByASC(String campo)
+        {
+            OrderBy(campo, "ASC");
+        }
+        public void OrderByDESC(String campo)
+        {
+            OrderBy(campo, "DESC");
+        }
         public String Generar()
         {
             String sql = "";
@@ -267,6 +295,10 @@ namespace Yui.DataBase
                     if (_whereRaw != "")
                     {
                         sql += " WHERE " + _whereRaw;
+                    }
+                    if (_orderby != "")
+                    {
+                        sql += " ORDER BY " + _orderby;
                     }
                     break;
                 case TipoQuery.UPDATE:
@@ -306,7 +338,7 @@ namespace Yui.DataBase
                         else
                         {
                             campos += ", " + item.Key;
-                            valores = ", '" + CheckValor(item.Value) + "'";
+                            valores += ", '" + CheckValor(item.Value) + "'";
                         }
                     }
                     if (campos != "" & valores != "")
@@ -327,6 +359,9 @@ namespace Yui.DataBase
                     break;
             }
             sql += ";";
+            //limpiamos las funciones especificas
+            sql = sql.Replace("'GETDATE()'", "GETDATE()");
+            //Console.WriteLine(sql);
             return sql;
         }
     }
