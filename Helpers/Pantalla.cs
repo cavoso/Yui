@@ -16,7 +16,7 @@ namespace Yui.Helpers
         [DllImport("user32.DLL", EntryPoint="SendMessage")]
         private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
 
-        public static void MoverPantall(Form f)
+        public static void MoverPantalla(Form f)
         {
             ReleaseCapture();
             SendMessage(f.Handle, 0x112, 0xF012, 0);

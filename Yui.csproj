@@ -68,6 +68,7 @@
     <Compile Include="Funciones\Security.cs" />
     <Compile Include="Funciones\Times.cs" />
     <Compile Include="Funciones\Validadores.cs" />
+    <Compile Include="Helpers\Combobox.cs" />
     <Compile Include="Helpers\Pantalla.cs" />
     <Compile Include="Herramientas Personalizadas\YUICombobox.cs">
       <SubType>Component</SubType>

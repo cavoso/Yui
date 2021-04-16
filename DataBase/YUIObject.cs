@@ -40,6 +40,7 @@ namespace Yui.DataBase
                 }
             }
         }
+        public DateTime DateTime { get; set; }
         private Object Obj;
         public YUIObject()
         {
@@ -79,6 +80,15 @@ namespace Yui.DataBase
             catch (Exception)
             {
                 Double = 0;
+            }
+            //convertimos a datetime
+            try
+            {
+                DateTime = Convert.ToDateTime(o);
+            }
+            catch (Exception)
+            {
+                DateTime = new DateTime();
             }
         }
         public new Type GetType()

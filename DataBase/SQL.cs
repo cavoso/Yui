@@ -175,7 +175,16 @@ namespace Yui.DataBase
         /// </returns>
         public Estructura.ObjSQL Query(String sql)
         {
-            return ExecuteQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new Estructura.ObjSQL();
+            }
+            else
+            {
+                return ExecuteQuery(sql);
+            }
+            
         }
         /// <summary>
         /// Permite ejecutar un Insert especificando la sintaxis SQL
@@ -238,7 +247,15 @@ namespace Yui.DataBase
         public Estructura.ObjSQL Get()
         {
             String sql = base.Generar();
-            return ExecuteQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new Estructura.ObjSQL();
+            }
+            else
+            {
+                return ExecuteQuery(sql);
+            }
         }
         /// <summary>
         /// Ejecuta la consulta SQL con la tabla asignada si no hay otros parametros configurados realizara la consulta SELECT * FROM TABLA 
@@ -249,7 +266,15 @@ namespace Yui.DataBase
         {
             base.Tabla(tabla);
             String sql = base.Generar();
-            return ExecuteQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new Estructura.ObjSQL();
+            }
+            else
+            {
+                return ExecuteQuery(sql);
+            }
         }
         /// <summary>
         /// Ejecuta la consulta SQL con la tabla y las condiciones asignadas
@@ -262,7 +287,15 @@ namespace Yui.DataBase
             base.Tabla(tabla);
             base.Where(where);
             String sql = base.Generar();
-            return ExecuteQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new Estructura.ObjSQL();
+            }
+            else
+            {
+                return ExecuteQuery(sql);
+            }
         }
         /// <summary>
         /// Ejecuta la consulta SQL solicitando los campos con la tabla y las condiciones asignadas
@@ -277,7 +310,15 @@ namespace Yui.DataBase
             base.Tabla(tabla);
             base.Where(where);
             String sql = base.Generar();
-            return ExecuteQuery(sql);
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new Estructura.ObjSQL();
+            }
+            else
+            {
+                return ExecuteQuery(sql);
+            }
         }
         #endregion
         #region Insert

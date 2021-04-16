@@ -71,5 +71,22 @@ namespace Yui.Extensiones
                 return d;
             }
         }
+        public static Boolean IsNumeric(this String aString)
+        {
+            int i;
+            bool bNum = int.TryParse(aString, out i);
+            return bNum;
+        }
+        public static int Number(this String aString)
+        {
+            try
+            {
+                return Convert.ToInt32(aString);
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
     }
 }
