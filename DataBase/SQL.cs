@@ -258,6 +258,88 @@ namespace Yui.DataBase
         }
         #endregion
         #region Metodos Autogenerados
+        #region Select For Class
+        /// <summary>
+        /// Ejecuta la consulta SQL, los parametros de configuracion deben estar establecidos previamente
+        /// </summary>
+        /// <returns></returns>
+        public List<T> Get<T>()
+        {
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<T>();
+            }
+            else
+            {
+                return ExecuteQuery<T>(sql);
+            }
+        }
+        /// <summary>
+        /// Ejecuta la consulta SQL con la tabla asignada si no hay otros parametros configurados realizara la consulta SELECT * FROM TABLA 
+        /// </summary>
+        /// <param name="tabla"></param>
+        /// <returns></returns>
+        public List<T> Get<T>(String tabla)
+        {
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<T>();
+            }
+            else
+            {
+                return ExecuteQuery<T>(sql);
+            }
+        }
+        /// <summary>
+        /// Ejecuta la consulta SQL con la tabla y las condiciones asignadas
+        /// </summary>
+        /// <param name="tabla"></param>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public List<T> Get<T>(String tabla, Dictionary<String, Object> where)
+        {
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<T>();
+            }
+            else
+            {
+                return ExecuteQuery<T>(sql);
+            }
+        }
+        /// <summary>
+        /// Ejecuta la consulta SQL solicitando los campos con la tabla y las condiciones asignadas
+        /// </summary>
+        /// <param name="campos"></param>
+        /// <param name="tabla"></param>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public List<T> Get<T>(String campos, String tabla, Dictionary<String, Object> where)
+        {
+            base.SetCampos(campos);
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<T>();
+            }
+            else
+            {
+                return ExecuteQuery<T>(sql);
+            }
+        }
+        #endregion
         #region Select
         /// <summary>
         /// Ejecuta la consulta SQL, los parametros de configuracion deben estar establecidos previamente
@@ -963,14 +1045,28 @@ namespace Yui.DataBase
             {
                 foreach (PropertyInfo pro in temp.GetProperties())
                 {
-                    Console.WriteLine(pro.GetCustomAttributes(true));
-                    if (pro.Name == column.ColumnName)
+                    SQLAttribute[] attribute = (SQLAttribute[])pro.GetCustomAttributes(typeof(SQLAttribute), true);
+                    if (attribute.Length > 0)
                     {
-                        pro.SetValue(obj, dr[column.ColumnName], null);
+                        if (attribute[0].ColumnSQLName == column.ColumnName)
+                        {
+                            pro.SetValue(obj, dr[column.ColumnName], null);
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
-                        continue;
+                        if (pro.Name == column.ColumnName)
+                        {
+                            pro.SetValue(obj, dr[column.ColumnName], null);
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                 }
             }

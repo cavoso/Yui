@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBase\SQLAttribute.cs" />
     <Compile Include="DataBase\Builder.cs" />
     <Compile Include="DataBase\ObjSQL.cs" />
     <Compile Include="DataBase\SQL.cs" />

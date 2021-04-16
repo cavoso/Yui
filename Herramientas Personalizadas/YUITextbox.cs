@@ -372,7 +372,7 @@ namespace Yui.Herramientas_Personalizadas
                 }
             }
         }
-        public bool IsVelidNumerico()
+        public bool IsValidNumerico()
         {
             if (Tipo == TipoCampo.Numero)
             {

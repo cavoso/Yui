@@ -29,5 +29,48 @@ namespace Yui.Funciones
 
             return strBuilder.ToString();
         }
+        /// <summary>
+        /// Genera un token con una marca de tiempo
+        /// </summary>
+        /// <returns>
+        /// retorna el Token
+        /// </returns>
+        public static string Token()
+        {
+            byte[] time = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
+            byte[] key = Guid.NewGuid().ToByteArray();
+            string token = Convert.ToBase64String(time.Concat(key).ToArray());
+
+            return token;
+        }
+        /// <summary>
+        /// Valida que el token siga siendo valido (solo valido para tokens generados con esta DLL)
+        /// </summary>
+        /// <param name="token">
+        /// token generado
+        /// </param>
+        /// <param name="horas">
+        /// tiempo en horas para validar la duracion del token por defecto 24 hrs
+        /// </param>
+        /// <returns>
+        /// retorna true o false dependiendo si el token lleva mas tiempo que el de validacion
+        /// </returns>
+        public static bool ValidacionToken(string token, int horas = -24)
+        {
+            if (horas > 0)
+            {
+                horas = horas * -1;
+            }
+            byte[] data = Convert.FromBase64String(token);
+            DateTime when = DateTime.FromBinary(BitConverter.ToInt64(data, 0));
+            if (when < DateTime.UtcNow.AddHours(horas))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
 }
