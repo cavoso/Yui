@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using System.Windows.Forms;
 using System.Data;
+using System.Reflection;
 
 namespace Yui.DataBase
 {
@@ -164,6 +165,24 @@ namespace Yui.DataBase
             return esql;
         }
         #region Metodos Manuales
+        /// <summary>
+        /// Permite ejecutar una consulta SQL indicando todo el sisntaxis SQL
+        /// </summary>
+        /// <typeparam name="T">Class con el formato que se devolvera la informacion</typeparam>
+        /// <param name="sql">Sintaxis SQL a ejecutar</param>
+        /// <returns>Devuelve lista de objetos basados en la class indicada</returns>
+        public List<T> Query<T>(String sql)
+        {
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<T>();
+            }
+            else
+            {
+                return ExecuteQuery<T>(sql);
+            }
+        }
         /// <summary>
         /// Permite ejecutar una consulta SQL indicando todo el sintaxis SQL
         /// </summary>
@@ -515,6 +534,110 @@ namespace Yui.DataBase
         #endregion
 
         #region Metodos Privados
+        private List<T> ExecuteQuery<T>(String sql)
+        {
+            LastQuery = sql;
+            List<T> s = new List<T>();
+            switch (Tipo)
+            {
+                case TipoConexion.MSSQL:
+                    try
+                    {
+                        con1.Open();
+                        SqlDataAdapter ADP = new SqlDataAdapter();
+                        DataSet ds = new DataSet();
+                        ADP.SelectCommand = new SqlCommand(sql, con1)
+                        {
+                            CommandTimeout = 240
+                        };
+                        ADP.Fill(ds);
+                        s = ConvertDataTable<T>(ds.Tables[0]);
+                    }
+                    catch (SqlException ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar la consulta: " + sql + "\n" +
+                                "Error: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar la consulta: " + sql + "\n" +
+                                "Error: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    finally
+                    {
+                        con1.Close();
+                        SqlConnection.ClearAllPools();
+                    }
+                    break;
+                case TipoConexion.MYSQL:
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand()
+                        {
+                            Connection = con2,
+                            CommandText = sql,
+                            CommandType = CommandType.Text
+                        };
+                        con2.Open();
+                        MySqlDataAdapter ADP = new MySqlDataAdapter();
+                        DataSet DS = new DataSet();
+                        ADP = new MySqlDataAdapter(cmd);
+                        ADP.Fill(DS);
+                        s = ConvertDataTable<T>(DS.Tables[0]);
+                    }
+                    catch (SqlException ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar la consulta: " + sql + "\n" +
+                                "Error: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar la consulta: " + sql + "\n" +
+                                "Error: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    finally
+                    {
+                        con2.Close();
+                        MySqlConnection.ClearAllPools();
+                    }
+                    break;
+            }
+            base.NewQuery();
+            return s;
+        }
+
         private Estructura.ObjSQL ExecuteQuery(String sql)
         {
             LastQuery = sql;
@@ -820,6 +943,38 @@ namespace Yui.DataBase
                     }
                     break;
             }
+        }
+        private static List<T> ConvertDataTable<T>(DataTable dt)
+        {
+            List<T> data = new List<T>();
+            foreach (DataRow row in dt.Rows)
+            {
+                T item = GetItem<T>(row);
+                data.Add(item);
+            }
+            return data;
+        }
+        private static T GetItem<T>(DataRow dr)
+        {
+            Type temp = typeof(T);
+            T obj = Activator.CreateInstance<T>();
+
+            foreach (DataColumn column in dr.Table.Columns)
+            {
+                foreach (PropertyInfo pro in temp.GetProperties())
+                {
+                    Console.WriteLine(pro.GetCustomAttributes(true));
+                    if (pro.Name == column.ColumnName)
+                    {
+                        pro.SetValue(obj, dr[column.ColumnName], null);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+            return obj;
         }
         #endregion
 
