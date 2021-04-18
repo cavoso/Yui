@@ -9,7 +9,7 @@ namespace Yui.DataBase
 {
     public class Builder
     {
-        private String _selectRaw;
+        //private String _selectRaw;
         private String _tabla;
         private String _whereRaw;
         private String _orderby;
@@ -36,7 +36,7 @@ namespace Yui.DataBase
         }
         public void NewQuery()
         {
-            _selectRaw = "";
+            //_selectRaw = "";
             _tabla = "";
             _whereRaw = "";
             _orderby = "";
@@ -45,7 +45,7 @@ namespace Yui.DataBase
         }
         public void NewQuery(TipoQuery tipo)
         {
-            _selectRaw = "";
+            //_selectRaw = "";
             _tabla = "";
             _whereRaw = "";
             _orderby = "";
