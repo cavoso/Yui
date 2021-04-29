@@ -719,7 +719,6 @@ namespace Yui.DataBase
             base.NewQuery();
             return s;
         }
-
         private Estructura.ObjSQL ExecuteQuery(String sql)
         {
             LastQuery = sql;
@@ -1026,50 +1025,88 @@ namespace Yui.DataBase
                     break;
             }
         }
-        private static List<T> ConvertDataTable<T>(DataTable dt)
+        private List<T> ConvertDataTable<T>(DataTable dt)
         {
             List<T> data = new List<T>();
-            foreach (DataRow row in dt.Rows)
+            try
             {
-                T item = GetItem<T>(row);
-                data.Add(item);
+                foreach (DataRow row in dt.Rows)
+                {
+                    T item = GetItem<T>(row);
+                    data.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (DebugMode)
+                {
+                    MessageBox.Show(
+                        "Imposible Cargar la lista \n" +
+                        "Error: " + ex.Message,
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
             }
             return data;
         }
-        private static T GetItem<T>(DataRow dr)
+        private T GetItem<T>(DataRow dr)
         {
             Type temp = typeof(T);
             T obj = Activator.CreateInstance<T>();
-
-            foreach (DataColumn column in dr.Table.Columns)
+            try
             {
-                foreach (PropertyInfo pro in temp.GetProperties())
+                foreach (DataColumn column in dr.Table.Columns)
                 {
-                    SQLAttribute[] attribute = (SQLAttribute[])pro.GetCustomAttributes(typeof(SQLAttribute), true);
-                    if (attribute.Length > 0)
+                    foreach (PropertyInfo pro in temp.GetProperties())
                     {
-                        if (attribute[0].ColumnSQLName == column.ColumnName)
+                        SQLAttribute[] attribute = (SQLAttribute[])pro.GetCustomAttributes(typeof(SQLAttribute), true);
+                        if (attribute.Length > 0)
                         {
-                            pro.SetValue(obj, dr[column.ColumnName], null);
+                            if (attribute[0].ColumnSQLName == column.ColumnName)
+                            {
+                                if (dr[column.ColumnName].GetType() != typeof(DBNull))
+                                {
+                                    pro.SetValue(obj, dr[column.ColumnName], null);
+                                }
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
                         else
                         {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        if (pro.Name == column.ColumnName)
-                        {
-                            pro.SetValue(obj, dr[column.ColumnName], null);
-                        }
-                        else
-                        {
-                            continue;
+                            if (pro.Name == column.ColumnName)
+                            {
+                                if (dr[column.ColumnName].GetType() != typeof(DBNull))
+                                {
+                                    pro.SetValue(obj, dr[column.ColumnName], null);
+                                }
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                if (DebugMode)
+                {
+                    MessageBox.Show(
+                        "Imposible procesar registro \n" +
+                        "Error: " + ex.Message,
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
+            
             return obj;
         }
         #endregion
