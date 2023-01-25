@@ -44,6 +44,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -53,6 +54,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Atributos\StringValueAttribute.cs" />
+    <Compile Include="DataBase\Atributos\Columna.cs" />
+    <Compile Include="DataBase\Atributos\CreationDate.cs" />
+    <Compile Include="DataBase\Atributos\Database.cs" />
+    <Compile Include="DataBase\Atributos\ID.cs" />
+    <Compile Include="DataBase\Atributos\Ignore.cs" />
+    <Compile Include="DataBase\Atributos\IgnoreIfNull.cs" />
+    <Compile Include="DataBase\Atributos\OtraTabla.cs" />
+    <Compile Include="DataBase\Atributos\ServerFunction.cs" />
+    <Compile Include="DataBase\Atributos\Tabla.cs" />
     <Compile Include="DataBase\Serialization\Attributes\YUIElement.cs" />
     <Compile Include="DataBase\SQLAttribute.cs" />
     <Compile Include="DataBase\Builder.cs" />
@@ -63,10 +74,13 @@
     <Compile Include="Engine.cs" />
     <Compile Include="Estructuras\ObjDataToGrid.cs" />
     <Compile Include="Extensiones\DateTime.cs" />
+    <Compile Include="Extensiones\Enum.cs" />
     <Compile Include="Extensiones\int.cs" />
+    <Compile Include="Extensiones\SQL.cs" />
     <Compile Include="Extensiones\String.cs" />
     <Compile Include="Filtros.cs" />
     <Compile Include="Funciones\Comunes.cs" />
+    <Compile Include="Funciones\Email.cs" />
     <Compile Include="Funciones\Security.cs" />
     <Compile Include="Funciones\Times.cs" />
     <Compile Include="Funciones\Validadores.cs" />
@@ -88,5 +102,6 @@
     <None Include="as.pfx" />
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -8,6 +8,8 @@ using MySql.Data.MySqlClient;
 using System.Windows.Forms;
 using System.Data;
 using System.Reflection;
+using Yui.Extensiones;
+using Yui.DataBase.Atributos;
 
 namespace Yui.DataBase
 {
@@ -16,7 +18,8 @@ namespace Yui.DataBase
         #region Propiedades Privadas
         protected SqlConnection con1;
         protected MySqlConnection con2;
-        protected new TipoConexion Tipo;        
+        protected new TipoConexion Tipo;
+        protected new SSLSQL SSL;
         protected Boolean _Status = false;
         protected List<String> esql;
         #endregion
@@ -47,6 +50,7 @@ namespace Yui.DataBase
         /// Devuelve o Establece el estado de mantener la consulta, esta propiedad se usa solo para hacer Commit
         /// </summary>
         public Boolean Preserve { get; set; } = false;
+        public long LastId { get; set; }
         #endregion
 
         #region Metodos Inicializadores
@@ -90,7 +94,7 @@ namespace Yui.DataBase
         public SQL(String Host, String User, String Pass, String DB, TipoConexion tipo)
             :base()
         {
-            SQLConfig c = new SQLConfig(Host, User, Pass, DB, tipo, "", false);
+            SQLConfig c = new SQLConfig(Host, User, Pass, DB, tipo, "");
             Inicializar(c);
         }
         /// <summary>
@@ -113,7 +117,7 @@ namespace Yui.DataBase
                 case TipoConexion.MSSQL:
                     try
                     {
-                        con1 = new SqlConnection("data source =" + c.Host + "; initial catalog =" + c.DB + "; user id =" + c.User + "; password =" + c.Pass + "");
+                        con1 = new SqlConnection(string.Format("data source ={0}; initial catalog ={1}; user id ={2}; password ={3}", c.Host, c.DB, c.User, c.Pass));
                         _Status = true;
                     }
                     catch (Exception ex)
@@ -132,8 +136,21 @@ namespace Yui.DataBase
                 case TipoConexion.MYSQL:
                     try
                     {
-                        con2 = new MySqlConnection("server=" + c.Host + ";User Id=" + c.User + ";password=" + c.Pass + ";Persist Security Info=True;database=" + c.DB + ";Convert Zero Datetime=True");
+                        string stringconexion = string.Format("server={0};User Id={1};password={2};Persist Security Info=True;database={3};Convert Zero Datetime=True", c.Host, c.User, c.Pass, c.DB);
+                        con2 = new MySqlConnection(stringconexion);
                         _Status = true;
+                    }
+                    catch (MySqlException ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Problema al intentar inicializar la conexion: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -833,7 +850,8 @@ namespace Yui.DataBase
                     {
                         con1.Open();
                         SqlCommand cmd = new SqlCommand(sql, con1);
-                        Affected_rows = cmd.ExecuteNonQuery();
+                        cmd.CommandTimeout = 1200;
+                        Affected_rows = cmd.ExecuteNonQuery();                        
                     }
                     catch (SqlException ex)
                     {
@@ -871,8 +889,9 @@ namespace Yui.DataBase
                     try
                     {
                         con2.Open();
-                        MySqlCommand cmd = new MySqlCommand(sql, con2);
+                        MySqlCommand cmd = new MySqlCommand(sql, con2);                        
                         Affected_rows = cmd.ExecuteNonQuery();
+                        LastId = cmd.LastInsertedId;
                     }
                     catch (SqlException ex)
                     {
@@ -1055,58 +1074,92 @@ namespace Yui.DataBase
         {
             Type temp = typeof(T);
             T obj = Activator.CreateInstance<T>();
-            try
-            {
+            
                 foreach (DataColumn column in dr.Table.Columns)
                 {
                     foreach (PropertyInfo pro in temp.GetProperties())
                     {
-                        SQLAttribute[] attribute = (SQLAttribute[])pro.GetCustomAttributes(typeof(SQLAttribute), true);
-                        if (attribute.Length > 0)
+                        try
                         {
-                            if (attribute[0].ColumnSQLName == column.ColumnName)
-                            {
-                                if (dr[column.ColumnName].GetType() != typeof(DBNull))
+                            var atributos = pro.GetCustomAttributes();
+                            if(atributos.Where(x => x.GetType().Name == "ColumnaAttribute" || x.GetType().Name == "IgnoreAttribute").ToList().Count() > 0){
+                                object valor = dr[column.ColumnName];
+                                if (valor.GetType() != typeof(DBNull))
                                 {
-                                    pro.SetValue(obj, dr[column.ColumnName], null);
+                                    bool ignore = false;
+                                    string columna = "";
+                                    foreach (var attr in atributos)
+                                    {
+                                        if (attr.GetType().Name == "ColumnaAttribute")
+                                        {
+                                            columna = ((ColumnaAttribute)attr).ColumName;
+                                        }
+                                        if (attr.GetType().Name == "IgnoreAttribute")
+                                        {
+                                            ignore = true;
+                                        }
+                                    }
+                                    if (!ignore) {
+                                        if (columna == column.ColumnName) {
+                                        pro.SetValue(obj, valor, null);
+                                        }
+                                    }                                    
                                 }
                             }
-                            else
-                            {
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            if (pro.Name == column.ColumnName)
-                            {
-                                if (dr[column.ColumnName].GetType() != typeof(DBNull))
+                            else {
+                                SQLAttribute[] attribute = (SQLAttribute[])pro.GetCustomAttributes(typeof(SQLAttribute), true);
+                                if (attribute.Length > 0)
                                 {
-                                    pro.SetValue(obj, dr[column.ColumnName], null);
+                                    if (!attribute[0].Ignore)
+                                    {
+                                        if (attribute[0].ColumnSQLName == column.ColumnName)
+                                        {
+                                            if (dr[column.ColumnName].GetType() != typeof(DBNull))
+                                            {
+                                                pro.SetValue(obj, dr[column.ColumnName], null);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                continue;
-                            }
+                                else
+                                {
+                                    if (pro.Name == column.ColumnName)
+                                    {
+                                        if (dr[column.ColumnName].GetType() != typeof(DBNull))
+                                        {
+                                            pro.SetValue(obj, dr[column.ColumnName], null);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }                           
+                            
                         }
+                        catch (Exception ex)
+                        {
+                            if (DebugMode){
+                                MessageBox.Show(
+                                    "Imposible procesar registro " + pro.Name + " \n" +
+                                    "Error: " + ex.Message,
+                                    "Error",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error
+                                );
+                            }
+                        }                   
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                if (DebugMode)
-                {
-                    MessageBox.Show(
-                        "Imposible procesar registro \n" +
-                        "Error: " + ex.Message,
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
-                }
-            }
-            
             return obj;
         }
         #endregion

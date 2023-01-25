@@ -30,48 +30,55 @@ namespace Yui.Funciones
                 rut = nrut[0];
                 ver = nrut[1];
             }
-            if (Information.IsNumeric(rut))
+            try
             {
-                Rut = Convert.ToInt32(rut);
-            }
-            else
-            {
-                Rut = 0;
-            }
-            Contador = 2;
-            Acumulador = 0;
-            while (Rut != 0)
-            {
-                Multiplo = ((Rut % 10) * Contador);
-                Acumulador = Acumulador + Multiplo;
-                Rut = (Rut / 10);
-                Contador += 1;
-                if (Contador > 7)
+                if (Information.IsNumeric(rut))
                 {
-                    Contador = 2;
+                    Rut = Convert.ToInt32(rut);
+                }
+                else
+                {
+                    Rut = 0;
+                }
+                Contador = 2;
+                Acumulador = 0;
+                while (Rut != 0)
+                {
+                    Multiplo = ((Rut % 10) * Contador);
+                    Acumulador = Acumulador + Multiplo;
+                    Rut = (Rut / 10);
+                    Contador += 1;
+                    if (Contador > 7)
+                    {
+                        Contador = 2;
+                    }
+                }
+                Digito = (11 - (Acumulador % 11));
+                if (Digito == 10)
+                {
+                    Verificador = "K";
+                }
+                else if (Digito == 11)
+                {
+                    Verificador = "0";
+                }
+                else
+                {
+                    Verificador = Digito.ToString();
+                }
+                if (ver == Verificador)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
-            Digito = (11 - (Acumulador % 11));
-            if (Digito == 10)
-            {
-                Verificador = "K";
-            }
-            else if (Digito == 11)
-            {
-                Verificador = "0";
-            }
-            else
-            {
-                Verificador = Digito.ToString();
-            }
-            if (ver == Verificador)
-            {
-                return true;
-            }
-            else
+            catch (Exception)
             {
                 return false;
-            }
+            }            
         }
         public static String RutFormat(String value, Boolean validar)
         {

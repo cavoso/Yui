@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Yui.Funciones
@@ -28,6 +29,15 @@ namespace Yui.Funciones
             }
 
             return strBuilder.ToString();
+        }
+        public static bool IsMD5(string input)
+        {
+            if (String.IsNullOrEmpty(input))
+            {
+                return false;
+            }
+
+            return Regex.IsMatch(input, "^[0-9a-fA-F]{32}$", RegexOptions.Compiled);
         }
         /// <summary>
         /// Genera un token con una marca de tiempo
@@ -71,6 +81,20 @@ namespace Yui.Funciones
             {
                 return true;
             }
+        }
+        public static string NuevaPassword(int largo)
+        {
+            Random rdn = new Random();
+            string caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890%$#@";
+            int longitud = caracteres.Length;
+            char letra;
+            string contraseniaAleatoria = string.Empty;
+            for (int i = 0; i < largo; i++)
+            {
+                letra = caracteres[rdn.Next(longitud)];
+                contraseniaAleatoria += letra.ToString();
+            }
+            return contraseniaAleatoria;
         }
     }
 }

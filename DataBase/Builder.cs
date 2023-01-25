@@ -1,20 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Forms;
 
 namespace Yui.DataBase
 {
+    /// <summary>
+    /// Constructor de consultas SQL, solo funciona dentro del Objeto SQL
+    /// </summary>
     public class Builder
     {
         //private String _selectRaw;
         private String _tabla;
         private String _whereRaw;
         private String _orderby;
+        private String _limit;
+        private List<string> _join = new List<string>();
         private String[] _comparadores;
         private Dictionary<String, Object> _campos;
+        private Boolean _group = false;
+        private Boolean _distinct = false;
+        private String _groupby;
         public TipoQuery Tipo { get; set; }
         public TipoConexion TipoDB { get; set; }
 
@@ -39,8 +48,13 @@ namespace Yui.DataBase
             //_selectRaw = "";
             _tabla = "";
             _whereRaw = "";
+            _join = new List<string>();
             _orderby = "";
+            _limit = "";
             _campos = new Dictionary<string, object>();
+            _group = false;
+            _distinct = false;
+            _groupby = "";
             Tipo = TipoQuery.SELECT;
         }
         public void NewQuery(TipoQuery tipo)
@@ -48,13 +62,62 @@ namespace Yui.DataBase
             //_selectRaw = "";
             _tabla = "";
             _whereRaw = "";
+            _join = new List<string>();
             _orderby = "";
+            _limit = "";
+            _groupby = "";
             Tipo = tipo;
+            _group = false;
+            _distinct = false;
         }
-
         public void Tabla(String tabla)
         {
             _tabla = tabla;
+        }
+        public void Join(String tabla, string condicion, TipoJoin tipo = TipoJoin.INNER)
+        {
+            string xjoin = "";
+            switch (tipo)
+            {
+                case TipoJoin.INNER:
+                    xjoin = string.Format("INNER JOIN {0} ON {1}", tabla, condicion);
+                    break;
+                case TipoJoin.LEFT:
+                    xjoin = string.Format("LEFT JOIN {0} ON {1}", tabla, condicion);
+                    break;
+                case TipoJoin.RIGHT:
+                    xjoin = string.Format("RIGHT JOIN {0} ON {1}", tabla, condicion);
+                    break;
+                case TipoJoin.FULL:
+                    xjoin = string.Format("FULL JOIN {0} ON {1}", tabla, condicion);
+                    break;
+                case TipoJoin.LEFTOUTER:
+                    xjoin = string.Format("LEFT OUTER JOIN {0} ON {1}", tabla, condicion);
+                    break;
+                case TipoJoin.RIGHTOUTER:
+                    xjoin = string.Format("RIGHT OUTER JOIN {0} ON {1}", tabla, condicion);
+                    break;
+                case TipoJoin.FULLOUTER:
+                    xjoin = string.Format("FULL OUTER JOIN {0} ON {1}", tabla, condicion);
+                    break;
+            }
+            if (_join.Count() > 0)
+            {
+                _join.Add(" " + xjoin);
+            }
+            else
+            {
+                _join.Add(xjoin);
+            }
+        }
+        public void Distinct()
+        {
+            _distinct = true;
+        }
+        public void Distinct(String campos)
+        {
+            _distinct = true;
+            SetCampos(campos);
         }
         public void Select(String campos)
         {
@@ -103,6 +166,22 @@ namespace Yui.DataBase
                 Where(item.Key, item.Value);
             }
         }
+        public void WhereIsNull(string campo)
+        {
+            _WhereSet("AND " + campo, "IS NULL");
+        }
+        public void WhereIsNotNull(string campo)
+        {
+            _WhereSet("AND " + campo, "IS NOT NULL");
+        }
+        public void OrWhereIsNull(string campo)
+        {
+            _WhereSet("OR " + campo, "IS NULL");
+        }
+        public void OrWhereIsNotNull(string campo)
+        {
+            _WhereSet("OR " + campo, "IS NOT NULL");
+        }
         public void OrWhere(String campo, Object valor, String comparador = "=")
         {
             if (_comparadores.Contains<String>(comparador))
@@ -143,21 +222,84 @@ namespace Yui.DataBase
             //_WhereSet(campo + " IN ", en);
             _whereRaw += (campo + " NOT IN " + en);
         }
+        public void YearWhere(String campo, Object valor, String comparador = "=")
+        {
+            if (_whereRaw != "")
+            {
+                _whereRaw += string.Format(" AND YEAR({0}){1}{2}", campo, comparador, valor);
+            }
+            else
+            {
+                _whereRaw += string.Format("YEAR({0}){1}{2}", campo, comparador, valor);
+            }
+           
+        }
+        public void MonthWhere(String campo, Object valor, String comparador = "=")
+        {
+            if (_whereRaw != "")
+            {
+                _whereRaw += string.Format(" AND MONTH({0}){1}{2}", campo, comparador, valor);
+            }
+            else
+            {
+                _whereRaw += string.Format("MONTH({0}){1}{2}", campo, comparador, valor);
+            }
+               
+        }
+        public void DayWhere(String campo, Object valor, String comparador = "=")
+        {
+            if (_whereRaw != "")
+            {
+                _whereRaw += string.Format(" AND DAY({0}){1}{2}", campo, comparador, valor);
+            }
+            else
+            {
+                _whereRaw += string.Format("DAY({0}){1}{2}", campo, comparador, valor);
+            }                
+        }
+        public void DATEADDWhere(string campo, string interval, int number, string date = "getdate()", String comparador = "=")
+        {
+            if (_whereRaw != "")
+            {
+                _whereRaw += string.Format(" AND {0} {1} DATEADD({2}, {3}, {4})", campo, comparador, interval, number, date);
+            }
+            else
+            {
+                _whereRaw += string.Format("{0} {1} DATEADD({2}, {3}, {4})", campo, comparador, interval, number, date);
+            }
+        }
+        public void Group_Start()
+        {
+            if (_whereRaw != "")
+            {
+                _whereRaw += " AND (";
+            }
+            else
+            {
+                _whereRaw += " (";
+            }
+           
+            _group = true;
+        }
+        public void Group_End()
+        {
+            _whereRaw += ")";
+        }
         public void Like(String campo, Object valor, TipoLike like = TipoLike.Contiene)
         {
             switch (like)
             {
                 case TipoLike.Contiene:
-                    _WhereSet(campo + " LIKE ", "%" + CheckValor(valor) + "%");
+                    _WhereSet("AND " + campo + " LIKE ", "%" + CheckValor(valor) + "%");
                     break;
                 case TipoLike.Comienza:
-                    _WhereSet(campo + " LIKE ", CheckValor(valor) + "%");
+                    _WhereSet("AND " + campo + " LIKE ", CheckValor(valor) + "%");
                     break;
                 case TipoLike.Termina:
-                    _WhereSet(campo + " LIKE ", "%" + CheckValor(valor));
+                    _WhereSet("AND " + campo + " LIKE ", "%" + CheckValor(valor));
                     break;
                 default:
-                    _WhereSet(campo + " LIKE ", "%" + CheckValor(valor) + "%");
+                    _WhereSet("AND " + campo + " LIKE ", "%" + CheckValor(valor) + "%");
                     break;
             }
         }
@@ -184,29 +326,73 @@ namespace Yui.DataBase
             switch (like)
             {
                 case TipoLike.Contiene:
-                    _WhereSet(campo + "NOT LIKE", "%" + CheckValor(valor) + "%");
+                    _WhereSet("AND " + campo + " NOT LIKE ", "%" + CheckValor(valor) + "%");
                     break;
                 case TipoLike.Comienza:
-                    _WhereSet(campo + "NOT LIKE", CheckValor(valor) + "%");
+                    _WhereSet("AND " + campo + " NOT LIKE ", CheckValor(valor) + "%");
                     break;
                 case TipoLike.Termina:
-                    _WhereSet(campo + "NOT LIKE", "%" + CheckValor(valor));
+                    _WhereSet("AND " + campo + " NOT LIKE ", "%" + CheckValor(valor));
                     break;
                 default:
-                    _WhereSet(campo + "NOT LIKE", "%" + CheckValor(valor) + "%");
+                    _WhereSet("AND " + campo + " NOT LIKE ", "%" + CheckValor(valor) + "%");
                     break;
             }
         }
+        public void FechaBetween(String campo, string inicio, string termino)
+        {
+            _WhereSet(string.Format(" AND {0} BETWEEN '{1} 00:00:00' xx '{2} 23:59:59'", campo, inicio, termino), "BETWEEN");
+        }
         private void _WhereSet(String campo, String valor)
         {
-            if (_whereRaw == "")
+            if (_whereRaw == "" || _group)
             {
-                _whereRaw = campo.Replace("OR ", "").Replace("NOT ", "").Replace("AND", "") + "'" + valor + "'";
+                string ng = "";
+                if (_group)
+                {
+                    ng = _whereRaw;
+                }
+                if (valor == "IS NULL")
+                {
+                    _whereRaw = campo.Replace("OR ", "").Replace("NOT ", "").Replace("AND", "") + " IS NULL";
+                }
+                else if (valor == "IS NOT NULL")
+                {
+                    _whereRaw = campo.Replace("OR ", "").Replace("AND", "") + " IS NOT NULL";
+                }
+                else if (valor == "BETWEEN")
+                {
+                    _whereRaw = campo.Replace("OR ", "").Replace("NOT ", "").Replace("AND", "").Replace("xx", "AND");
+                }
+                else
+                {
+                    _whereRaw = campo.Replace("OR ", "").Replace("NOT ", "").Replace("AND", "") + "'" + valor + "'";                    
+                }
+                if (_group)
+                {
+                    _whereRaw = ng + _whereRaw;
+                    _group = false;
+                }
             }
             else
             {
-                _whereRaw += " " + campo + "'" + valor + "'";
-            }
+                if (valor == "IS NULL")
+                {
+                    _whereRaw += " " + campo + " IS NULL";
+                }
+                else if (valor == "IS NOT NULL")
+                {
+                    _whereRaw += " " + campo + " IS NOT NULL";
+                }
+                else if (valor == "BETWEEN")
+                {
+                    _whereRaw += campo.Replace("xx", "AND");
+                }
+                else
+                {
+                    _whereRaw += " " + campo + "'" + valor + "'";                                       
+                }                
+            }            
         }
         private String CheckValor(Object valor)
         {
@@ -264,6 +450,21 @@ namespace Yui.DataBase
         {
             OrderBy(campo, "DESC");
         }
+        public void Limit(Int64 count, Int64 init = 0)
+        {
+            if (TipoDB == TipoConexion.MYSQL)
+            {
+                _limit = string.Format("LIMIT {0}, {1}", init, count);
+            }
+            else
+            {
+                _limit = string.Format("TOP {0} ", count);
+            }
+        }
+        public void GroupBy(string value)
+        {
+            _groupby = value;
+        }
         public String Generar()
         {
             String sql = "";
@@ -271,6 +472,14 @@ namespace Yui.DataBase
             {
                 case TipoQuery.SELECT:
                     sql = "SELECT ";
+                    if (_limit != "" && TipoDB == TipoConexion.MSSQL)
+                    {
+                        sql += " " + _limit;
+                    }
+                    if (_distinct)
+                    {
+                        sql += " DISTINCT ";
+                    }
                     String ca = "";
                     foreach (var item in _campos)
                     {
@@ -292,13 +501,29 @@ namespace Yui.DataBase
                         sql += "* ";
                     }
                     sql += "FROM " + _tabla;
+                    if (_join.Count() > 0)
+                    {
+                        foreach (string item in _join)
+                        {
+                            sql += " " + item;
+                        }
+                        
+                    }
                     if (_whereRaw != "")
                     {
                         sql += " WHERE " + _whereRaw;
                     }
+                    if (_groupby != "")
+                    {
+                        sql += " GROUP BY " + _groupby;
+                    }
                     if (_orderby != "")
                     {
                         sql += " ORDER BY " + _orderby;
+                    }
+                    if (_limit != "" && TipoDB == TipoConexion.MYSQL)
+                    {
+                        sql += " " + _limit;
                     }
                     break;
                 case TipoQuery.UPDATE:
@@ -307,14 +532,11 @@ namespace Yui.DataBase
                     String c = "";
                     foreach (var item in _campos)
                     {
-                        if (c == "")
+                        if (c != "")
                         {
-                            c = item.Key + " = '" + CheckValor(item.Value) + "'";
+                            c += ", ";
                         }
-                        else
-                        {
-                            c += ", " + item.Key + " = '" + CheckValor(item.Value) + "'";
-                        }
+                        c += item.Key + " = '" + CheckValor(item.Value) + "'";
                     }
                     sql += " SET " + c;
                     if (_whereRaw != "")
@@ -353,7 +575,6 @@ namespace Yui.DataBase
                     {
                         sql += " WHERE " + _whereRaw;
                     }
-                   
                     break;
                 default:
                     break;
@@ -361,6 +582,8 @@ namespace Yui.DataBase
             sql += ";";
             //limpiamos las funciones especificas
             sql = sql.Replace("'GETDATE()'", "GETDATE()");
+            sql = sql.Replace("'now()'", "NOW()");
+            sql = sql.Replace("'NOW()'", "NOW()");
             //Console.WriteLine(sql);
             return sql;
         }

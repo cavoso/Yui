@@ -1,4 +1,6 @@
-﻿namespace Yui
+﻿using Yui.Atributos;
+
+namespace Yui
 {
     public enum TipoConexion
     {
@@ -11,6 +13,19 @@
         UPDATE = 1,
         INSERT = 2,
         DELETE = 3
+    }
+    public enum SSLSQL
+    {
+        [StringValue("Preferred")]
+        PREFERRED = 0,
+        [StringValue("None")]
+        NONE = 1,
+        [StringValue("Required")]
+        REQUIRED = 2,
+        [StringValue("VerifyCA")]
+        VERIFYCA = 3,
+        [StringValue("VerifyFull")]
+        VERIFYFULL = 4
     }
     public enum TipoLike
     {
@@ -26,6 +41,16 @@
         /// Se establecera como %valor
         /// </summary>
         Termina = 2
+    }
+    public enum TipoJoin
+    {
+        INNER = 0,
+        LEFT = 1,
+        RIGHT = 2,
+        FULL = 3,
+        LEFTOUTER = 4,
+        RIGHTOUTER = 5,
+        FULLOUTER = 6
     }
     public enum TipoFecha
     {

@@ -15,7 +15,7 @@ namespace Yui.DataBase
         public TipoConexion Tipo { get; set; }
         public String Nombre { get; set; }
         public Boolean Predeterminada { get; set; }
-        
+
 
         public SQLConfig()
         {

@@ -165,6 +165,9 @@ namespace Yui.Funciones
         {
             btn.Image = new Bitmap(btn.Image, s, s);
         }
-
+        public static void Message(string contenido)
+        {
+            MessageBox.Show(contenido);
+        }
     }
 }
