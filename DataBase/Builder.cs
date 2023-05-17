@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -19,6 +20,7 @@ namespace Yui.DataBase
         private String _orderby;
         private String _limit;
         private List<string> _join = new List<string>();
+        private List<string> _calculo = new List<string>();
         private String[] _comparadores;
         private Dictionary<String, Object> _campos;
         private Boolean _group = false;
@@ -49,6 +51,7 @@ namespace Yui.DataBase
             _tabla = "";
             _whereRaw = "";
             _join = new List<string>();
+            _calculo = new List<string>();
             _orderby = "";
             _limit = "";
             _campos = new Dictionary<string, object>();
@@ -63,6 +66,7 @@ namespace Yui.DataBase
             _tabla = "";
             _whereRaw = "";
             _join = new List<string>();
+            _calculo = new List<string>();
             _orderby = "";
             _limit = "";
             _groupby = "";
@@ -132,6 +136,10 @@ namespace Yui.DataBase
         }
         public void SetCampos(String campo, Object valor)
         {
+            if (IsArithmeticCalculation(valor.ToString()))
+            {
+                _calculo.Add(campo);
+            }
             if (_campos.ContainsKey(campo.ToLower()))
             {
                 _campos[campo.ToLower()] = valor;
@@ -536,7 +544,15 @@ namespace Yui.DataBase
                         {
                             c += ", ";
                         }
-                        c += item.Key + " = '" + CheckValor(item.Value) + "'";
+                        if (_calculo.Contains(item.Key))
+                        {
+                            c += item.Key + " = " + CheckValor(item.Value);
+                        }
+                        else
+                        {
+                            c += item.Key + " = '" + CheckValor(item.Value) + "'";
+                        }
+                        
                     }
                     sql += " SET " + c;
                     if (_whereRaw != "")
@@ -586,6 +602,44 @@ namespace Yui.DataBase
             sql = sql.Replace("'NOW()'", "NOW()");
             //Console.WriteLine(sql);
             return sql;
+        }
+        public static bool IsArithmeticCalculation(string value)
+        {
+            // Check if the value is empty or null
+            if (value == null)
+            {
+                return false;
+            }
+
+            // Check if the string is a date
+            if (DateTime.TryParse(value, out DateTime date))
+            {
+                return false;
+            }
+
+            // Create a set of HTML characters
+            var htmlCharacters = new HashSet<char> { '<', '>', '"', '&' };
+
+            // Check if the value contains any HTML characters
+            foreach (var character in value)
+            {
+                if (htmlCharacters.Contains(character))
+                {
+                    return false;
+                }
+            }
+
+            // Check if the value contains any arithmetic operators
+            foreach (var character in value)
+            {
+                if (character == '+' || character == '-' || character == '*' || character == '/')
+                {
+                    return true;
+                }
+            }
+
+            // If the value does not contain any HTML characters or arithmetic operators, then it is not an arithmetic calculation
+            return false;
         }
     }
 }

@@ -155,11 +155,15 @@ namespace Yui.Funciones
                 MessageBox.Show(string.Format("Error al intentar incializar los parametros, error: {0}", ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-        public void Adjunto(string Adjunto)
+        public void Adjunto(string Adjunto, string nombre = "")
         {
             if (IsInit)
             {
-                Correo.Attachments.Add(new Attachment(Adjunto));
+                Attachment adj = new Attachment(Adjunto)
+                {
+                    Name = nombre
+                };
+                Correo.Attachments.Add(adj);
             }
             else
             {

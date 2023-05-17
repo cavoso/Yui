@@ -10,6 +10,7 @@ using System.Data;
 using System.Reflection;
 using Yui.Extensiones;
 using Yui.DataBase.Atributos;
+using System.Web.UI.WebControls;
 
 namespace Yui.DataBase
 {
@@ -354,6 +355,66 @@ namespace Yui.DataBase
             else
             {
                 return ExecuteQuery<T>(sql);
+            }
+        }
+        #endregion
+        #region Select for Dictionary
+        public List<Dictionary<string, object>> GetByDictionary()
+        {
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<Dictionary<string, object>>();
+            }
+            else
+            {
+                return ExecuteQueryDictionary(sql);
+            }
+        }
+        public List<Dictionary<string, object>> GetByDictionary(String tabla)
+        {
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<Dictionary<string, object>>();
+            }
+            else
+            {
+                return ExecuteQueryDictionary(sql);
+            }
+        }
+        public List<Dictionary<string, object>> GetByDictionary(String tabla, Dictionary<String, Object> where)
+        {
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<Dictionary<string, object>>();
+            }
+            else
+            {
+                return ExecuteQueryDictionary(sql);
+            }
+        }
+        public List<Dictionary<string, object>> GetByDictionary(String campos, String tabla, Dictionary<String, Object> where)
+        {
+            base.SetCampos(campos);
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<Dictionary<string, object>>();
+            }
+            else
+            {
+                return ExecuteQueryDictionary(sql);
             }
         }
         #endregion
@@ -802,6 +863,127 @@ namespace Yui.DataBase
                         ADP = new MySqlDataAdapter(cmd);
                         ADP.Fill(DS);
                         s = new Estructura.ObjSQL(DS);
+                    }
+                    catch (SqlException ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar la consulta: " + sql + "\n" +
+                                "Error: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar la consulta: " + sql + "\n" +
+                                "Error: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    finally
+                    {
+                        con2.Close();
+                        MySqlConnection.ClearAllPools();
+                    }
+                    break;
+            }
+            base.NewQuery();
+            return s;
+        }
+        private List<Dictionary<string, object>> ExecuteQueryDictionary(String sql)
+        {
+            LastQuery = sql;
+            List<Dictionary<string, object>> s = new List<Dictionary<string, object>>();
+            switch (Tipo)
+            {
+                case TipoConexion.MSSQL:
+                    try
+                    {
+                        con1.Open();
+                        SqlDataAdapter ADP = new SqlDataAdapter();
+                        DataSet ds = new DataSet();
+                        ADP.SelectCommand = new SqlCommand(sql, con1)
+                        {
+                            CommandTimeout = 240
+                        };
+                        ADP.Fill(ds);
+                        s = new List<Dictionary<string, object>>();
+                        foreach (DataRow fila in ds.Tables[0].Rows)
+                        {
+                            Dictionary<string, object> diccionario = new Dictionary<string, object>();
+                            foreach (DataColumn columna in ds.Tables[0].Columns)
+                            {
+                                diccionario[columna.ColumnName] = fila[columna];
+                            }
+                            s.Add(diccionario);
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar la consulta: " + sql + "\n" +
+                                "Error: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (DebugMode)
+                        {
+                            MessageBox.Show(
+                                "Imposible ejecutar la consulta: " + sql + "\n" +
+                                "Error: " + ex.Message,
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error
+                            );
+                        }
+                    }
+                    finally
+                    {
+                        con1.Close();
+                        SqlConnection.ClearAllPools();
+                    }
+                    break;
+                case TipoConexion.MYSQL:
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand()
+                        {
+                            Connection = con2,
+                            CommandText = sql,
+                            CommandType = CommandType.Text
+                        };
+                        con2.Open();
+                        MySqlDataAdapter ADP = new MySqlDataAdapter();
+                        DataSet DS = new DataSet();
+                        ADP = new MySqlDataAdapter(cmd);
+                        ADP.Fill(DS);
+                        s = new List<Dictionary<string, object>>();
+                        foreach (DataRow fila in DS.Tables[0].Rows)
+                        {
+                            Dictionary<string, object> diccionario = new Dictionary<string, object>();
+                            foreach (DataColumn columna in DS.Tables[0].Columns)
+                            {
+                                diccionario[columna.ColumnName] = fila[columna];
+                            }
+                            s.Add(diccionario);
+                        }
                     }
                     catch (SqlException ex)
                     {
