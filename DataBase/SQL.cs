@@ -20,7 +20,6 @@ namespace Yui.DataBase
         protected SqlConnection con1;
         protected MySqlConnection con2;
         protected new TipoConexion Tipo;
-        protected new SSLSQL SSL;
         protected Boolean _Status = false;
         protected List<String> esql;
         #endregion
@@ -201,6 +200,18 @@ namespace Yui.DataBase
                 return ExecuteQuery<T>(sql);
             }
         }
+        public List<Dictionary<string, object>> QuerybyDictionary(String sql)
+        {
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return new List<Dictionary<string, object>>();
+            }
+            else
+            {
+                return ExecuteQueryDictionary(sql);
+            }
+        }
         /// <summary>
         /// Permite ejecutar una consulta SQL indicando todo el sintaxis SQL
         /// </summary>
@@ -355,6 +366,92 @@ namespace Yui.DataBase
             else
             {
                 return ExecuteQuery<T>(sql);
+            }
+        }
+        #endregion
+        #region Select For Class Single
+        /// <summary>
+        /// Ejecuta la consulta SQL, los parametros de configuracion deben estar establecidos previamente
+        /// </summary>
+        /// <returns></returns>
+        public T GetOne<T>()
+        {
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return Activator.CreateInstance<T>();
+            }
+            else
+            {
+                List<T> list = ExecuteQuery<T>(sql);
+                return list.First();
+            }
+        }
+        /// <summary>
+        /// Ejecuta la consulta SQL con la tabla asignada si no hay otros parametros configurados realizara la consulta SELECT * FROM TABLA 
+        /// </summary>
+        /// <param name="tabla"></param>
+        /// <returns></returns>
+        public T GetOne<T>(String tabla)
+        {
+            base.Tabla(tabla);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return Activator.CreateInstance<T>();
+            }
+            else
+            {
+                List<T> list = ExecuteQuery<T>(sql);
+                return list.First();
+            }
+        }
+        /// <summary>
+        /// Ejecuta la consulta SQL con la tabla y las condiciones asignadas
+        /// </summary>
+        /// <param name="tabla"></param>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public T GetOne<T>(String tabla, Dictionary<String, Object> where)
+        {
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return Activator.CreateInstance<T>();
+            }
+            else
+            {
+                List<T> list = ExecuteQuery<T>(sql);
+                return list.First();
+            }
+        }
+        /// <summary>
+        /// Ejecuta la consulta SQL solicitando los campos con la tabla y las condiciones asignadas
+        /// </summary>
+        /// <param name="campos"></param>
+        /// <param name="tabla"></param>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public T GetOne<T>(String campos, String tabla, Dictionary<String, Object> where)
+        {
+            base.SetCampos(campos);
+            base.Tabla(tabla);
+            base.Where(where);
+            String sql = base.Generar();
+            if (Preserve)
+            {
+                esql.Add(sql);
+                return Activator.CreateInstance<T>();
+            }
+            else
+            {
+                List<T> list = ExecuteQuery<T>(sql);
+                return list.First();
             }
         }
         #endregion

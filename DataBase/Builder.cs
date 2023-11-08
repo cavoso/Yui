@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -59,6 +61,10 @@ namespace Yui.DataBase
             _distinct = false;
             _groupby = "";
             Tipo = TipoQuery.SELECT;
+            if (TipoDB == null)
+            {
+                TipoDB = TipoConexion.MYSQL;
+            }
         }
         public void NewQuery(TipoQuery tipo)
         {
@@ -127,16 +133,23 @@ namespace Yui.DataBase
         {
             SetCampos(campos);
         }
+        public void Select(List<String> campos)
+        {
+            foreach (string item in campos)
+            {
+                SetCampos(item);
+            }
+        }
         public void SetCampos(String campos)
         {
             foreach (var item in campos.Split(','))
             {
                 SetCampos(item, new object());
             }
-        }
-        public void SetCampos(String campo, Object valor)
+        }   
+        public void SetCampos(String campo, Object valor, bool calculo = false)
         {
-            if (IsArithmeticCalculation(valor.ToString()))
+            if (calculo)
             {
                 _calculo.Add(campo);
             }
@@ -289,6 +302,19 @@ namespace Yui.DataBase
            
             _group = true;
         }
+        public void OrGroup_Start()
+        {
+            if (_whereRaw != "")
+            {
+                _whereRaw += " OR (";
+            }
+            else
+            {
+                _whereRaw += " (";
+            }
+
+            _group = true;
+        }
         public void Group_End()
         {
             _whereRaw += ")";
@@ -350,6 +376,17 @@ namespace Yui.DataBase
         public void FechaBetween(String campo, string inicio, string termino)
         {
             _WhereSet(string.Format(" AND {0} BETWEEN '{1} 00:00:00' xx '{2} 23:59:59'", campo, inicio, termino), "BETWEEN");
+        }
+        public void WhereFecha(string campo, DateTime fecha, String comparador = "=")
+        {
+            if (_whereRaw != "")
+            {
+                _whereRaw += string.Format(" AND CONVERT(VARCHAR(10), {0}, 120){1}'{2}'", campo, comparador, fecha.ToString("yyyy-MM-dd"));
+            }
+            else
+            {
+                _whereRaw += string.Format("CONVERT(VARCHAR(10), {0}, 120){1}'{2}'", campo, comparador, fecha.ToString("yyyy-MM-dd"));
+            }
         }
         private void _WhereSet(String campo, String valor)
         {
@@ -488,27 +525,15 @@ namespace Yui.DataBase
                     {
                         sql += " DISTINCT ";
                     }
-                    String ca = "";
-                    foreach (var item in _campos)
+                    if (_campos.Count > 0)
                     {
-                        if (ca == "")
-                        {
-                            ca = item.Key;
-                        }
-                        else
-                        {
-                            ca = ca + ", " + item.Key;
-                        }
-                    }
-                    if (ca != "")
-                    {
-                        sql += ca + " ";
-                    }
+                        sql += string.Join(", ", _campos.Keys);
+                    }                    
                     else
                     {
-                        sql += "* ";
+                        sql += "*";
                     }
-                    sql += "FROM " + _tabla;
+                    sql += " FROM " + _tabla;
                     if (_join.Count() > 0)
                     {
                         foreach (string item in _join)
@@ -603,43 +628,6 @@ namespace Yui.DataBase
             //Console.WriteLine(sql);
             return sql;
         }
-        public static bool IsArithmeticCalculation(string value)
-        {
-            // Check if the value is empty or null
-            if (value == null)
-            {
-                return false;
-            }
 
-            // Check if the string is a date
-            if (DateTime.TryParse(value, out DateTime date))
-            {
-                return false;
-            }
-
-            // Create a set of HTML characters
-            var htmlCharacters = new HashSet<char> { '<', '>', '"', '&' };
-
-            // Check if the value contains any HTML characters
-            foreach (var character in value)
-            {
-                if (htmlCharacters.Contains(character))
-                {
-                    return false;
-                }
-            }
-
-            // Check if the value contains any arithmetic operators
-            foreach (var character in value)
-            {
-                if (character == '+' || character == '-' || character == '*' || character == '/')
-                {
-                    return true;
-                }
-            }
-
-            // If the value does not contain any HTML characters or arithmetic operators, then it is not an arithmetic calculation
-            return false;
-        }
     }
 }

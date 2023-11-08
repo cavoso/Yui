@@ -21,5 +21,12 @@ namespace Yui.Extensiones
         {
             return Funciones.Times.DiaSemana[(int)f.DayOfWeek];
         }
+        public static Double TimeStamp(this DateTime f)
+        {
+            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            TimeSpan timeSpan = f - epoch;
+            double timestamp = timeSpan.TotalSeconds;
+            return (timestamp * 1000);
+        }
     }
 }
