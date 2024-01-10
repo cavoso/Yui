@@ -586,8 +586,6 @@ namespace Yui.DataBase
                     }
                     break;
                 case TipoQuery.INSERT:
-                    //INSERT INTO CUSTOMERS (ID,NAME,AGE,ADDRESS,SALARY)
-                    //VALUES(6, 'Komal', 22, 'MP', 4500.00);
                     sql = "INSERT INTO " + _tabla;
                     string campos = "";
                     string valores = "";
@@ -622,6 +620,7 @@ namespace Yui.DataBase
             }
             sql += ";";
             //limpiamos las funciones especificas
+            sql = sql.Replace("'getdate()'", "GETDATE()");
             sql = sql.Replace("'GETDATE()'", "GETDATE()");
             sql = sql.Replace("'now()'", "NOW()");
             sql = sql.Replace("'NOW()'", "NOW()");
