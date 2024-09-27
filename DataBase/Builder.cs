@@ -30,7 +30,7 @@ namespace Yui.DataBase
         private String _groupby;
         public TipoQuery Tipo { get; set; }
         public TipoConexion TipoDB { get; set; }
-
+        //se aplica el cambio
         public Builder()
         {
             NewQuery();
@@ -282,11 +282,29 @@ namespace Yui.DataBase
         {
             if (_whereRaw != "")
             {
-                _whereRaw += string.Format(" AND {0} {1} DATEADD({2}, {3}, {4})", campo, comparador, interval, number, date);
+                if (TipoDB == TipoConexion.MSSQL)
+                {
+                    _whereRaw += string.Format(" AND {0} {1} DATEADD({2}, {3}, {4})", campo, comparador, interval, number, date);
+                }
+                else
+                {
+                    date = "now()";
+                    _whereRaw += string.Format(" AND TIMESTAMPDIFF({2}, {0}, {4}) {1} {3}", campo, comparador, interval, number, date);
+                }
+               
             }
             else
             {
-                _whereRaw += string.Format("{0} {1} DATEADD({2}, {3}, {4})", campo, comparador, interval, number, date);
+                if (TipoDB == TipoConexion.MSSQL)
+                {
+                    _whereRaw += string.Format("{0} {1} DATEADD({2}, {3}, {4})", campo, comparador, interval, number, date);
+                }
+                else
+                {
+                    date = "now()";
+                    _whereRaw += string.Format("TIMESTAMPDIFF({2}, {0}, {4}) {1} {3}", campo, comparador, interval, number, date);
+                }
+                
             }
         }
         public void Group_Start()

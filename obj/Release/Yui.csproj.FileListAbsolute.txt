@@ -12,7 +12,6 @@ C:\Personal\source\Yui\obj\Release\Yui.csproj.AssemblyReference.cache
 C:\Personal\source\Yui\obj\Release\Yui.csproj.CoreCompileInputs.cache
 C:\Personal\source\Yui\obj\Release\Yui.dll
 C:\Personal\source\Yui\obj\Release\Yui.pdb
-C:\Personal\source\Yui\obj\Release\Yui.csproj.CopyComplete
 C:\Personal\source\Yui\bin\Release\MySql.Data.dll
 C:\Personal\source\Yui\bin\Release\Google.Protobuf.dll
 C:\Personal\source\Yui\bin\Release\ZstdNet.dll
@@ -24,3 +23,4 @@ C:\Personal\source\Yui\bin\Release\System.Buffers.dll
 C:\Personal\source\Yui\bin\Release\K4os.Compression.LZ4.dll
 C:\Personal\source\Yui\bin\Release\K4os.Hash.xxHash.dll
 C:\Personal\source\Yui\bin\Release\MySql.Data.xml
+C:\Personal\source\Yui\obj\Release\Yui.csproj.Up2Date

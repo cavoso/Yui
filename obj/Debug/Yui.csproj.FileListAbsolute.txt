@@ -34,7 +34,6 @@ C:\Personal\source\Yui\obj\Debug\Yui.csproj.CoreCompileInputs.cache
 C:\Personal\source\Yui\obj\Debug\Yui.dll
 C:\Personal\source\Yui\obj\Debug\Yui.pdb
 C:\Personal\source\Yui\bin\Debug\MySql.Data.xml
-C:\Personal\source\Yui\obj\Debug\Yui.csproj.CopyComplete
 C:\Personal\source\Yui\bin\Debug\MySql.Data.dll
 C:\Personal\source\Yui\bin\Debug\Google.Protobuf.dll
 C:\Personal\source\Yui\bin\Debug\ZstdNet.dll
@@ -45,3 +44,4 @@ C:\Personal\source\Yui\bin\Debug\System.Memory.dll
 C:\Personal\source\Yui\bin\Debug\System.Buffers.dll
 C:\Personal\source\Yui\bin\Debug\K4os.Compression.LZ4.dll
 C:\Personal\source\Yui\bin\Debug\K4os.Hash.xxHash.dll
+C:\Personal\source\Yui\obj\Debug\Yui.csproj.Up2Date

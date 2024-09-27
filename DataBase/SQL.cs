@@ -808,7 +808,7 @@ namespace Yui.DataBase
                             CommandTimeout = 240
                         };
                         ADP.Fill(ds);
-                        s = ConvertDataTable<T>(ds.Tables[0]);
+                        s = ConvertDataTable<T>(ds.Tables[0]);                        
                     }
                     catch (SqlException ex)
                     {
@@ -838,6 +838,7 @@ namespace Yui.DataBase
                     }
                     finally
                     {
+                        
                         con1.Close();
                         SqlConnection.ClearAllPools();
                     }
@@ -845,16 +846,20 @@ namespace Yui.DataBase
                 case TipoConexion.MYSQL:
                     try
                     {
+                        con2.Open();
                         MySqlCommand cmd = new MySqlCommand()
                         {
                             Connection = con2,
                             CommandText = sql,
-                            CommandType = CommandType.Text
+                            CommandType = CommandType.Text,
+                            CommandTimeout = 1000
+
                         };
-                        con2.Open();
+                        
                         MySqlDataAdapter ADP = new MySqlDataAdapter();
                         DataSet DS = new DataSet();
                         ADP = new MySqlDataAdapter(cmd);
+                        
                         ADP.Fill(DS);
                         s = ConvertDataTable<T>(DS.Tables[0]);
                     }
@@ -864,7 +869,7 @@ namespace Yui.DataBase
                         {
                             MessageBox.Show(
                                 "Imposible ejecutar la consulta: " + sql + "\n" +
-                                "Error: " + ex.Message,
+                                "Error: " + ex.StackTrace,
                                 "Error",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Error
@@ -877,7 +882,7 @@ namespace Yui.DataBase
                         {
                             MessageBox.Show(
                                 "Imposible ejecutar la consulta: " + sql + "\n" +
-                                "Error: " + ex.Message,
+                                "Error: " + ex.StackTrace,
                                 "Error",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Error
@@ -952,7 +957,8 @@ namespace Yui.DataBase
                         {
                             Connection = con2,
                             CommandText = sql,
-                            CommandType = CommandType.Text
+                            CommandType = CommandType.Text,
+                            CommandTimeout = 1000
                         };
                         con2.Open();
                         MySqlDataAdapter ADP = new MySqlDataAdapter();
@@ -967,7 +973,7 @@ namespace Yui.DataBase
                         {
                             MessageBox.Show(
                                 "Imposible ejecutar la consulta: " + sql + "\n" +
-                                "Error: " + ex.Message,
+                                "Error: " + ex.StackTrace,
                                 "Error",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Error
@@ -1064,7 +1070,8 @@ namespace Yui.DataBase
                         {
                             Connection = con2,
                             CommandText = sql,
-                            CommandType = CommandType.Text
+                            CommandType = CommandType.Text,
+                            CommandTimeout = 1000
                         };
                         con2.Open();
                         MySqlDataAdapter ADP = new MySqlDataAdapter();
@@ -1088,7 +1095,7 @@ namespace Yui.DataBase
                         {
                             MessageBox.Show(
                                 "Imposible ejecutar la consulta: " + sql + "\n" +
-                                "Error: " + ex.Message,
+                                "Error: " + ex.StackTrace,
                                 "Error",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Error
@@ -1178,7 +1185,7 @@ namespace Yui.DataBase
                         {
                             MessageBox.Show(
                                 "Imposible ejecutar la consulta: " + sql + "\n" +
-                                "Error: " + ex.Message,
+                                "Error: " + ex.StackTrace,
                                 "Error",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Error
@@ -1296,7 +1303,7 @@ namespace Yui.DataBase
                             {
                                 MessageBox.Show(
                                     "Imposible ejecutar el Rollback \n" +
-                                    "Error: " + ex.Message,
+                                    "Error: " + ex.StackTrace,
                                     "Error",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error
