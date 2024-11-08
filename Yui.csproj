@@ -74,6 +74,7 @@
     <Compile Include="Engine.cs" />
     <Compile Include="Estructuras\ObjDataToGrid.cs" />
     <Compile Include="Extensiones\DateTime.cs" />
+    <Compile Include="Extensiones\Double.cs" />
     <Compile Include="Extensiones\Enum.cs" />
     <Compile Include="Extensiones\int.cs" />
     <Compile Include="Extensiones\SQL.cs" />
